@@ -1,6 +1,6 @@
-import { useState } from 'preact/hooks';
+import { useState, useEffect } from 'preact/hooks';
 import { route } from 'preact-router';
-import { useAuth } from '../lib/auth';
+import { useAuth, supabase } from '../lib/auth';
 
 export function Login() {
   const { signIn } = useAuth();
@@ -8,6 +8,13 @@ export function Login() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+
+  // Check if Supabase is configured
+  useEffect(() => {
+    if (!supabase) {
+      setError('⚠️ Configuration Error: Supabase environment variables are missing. Please rebuild the frontend with VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY.');
+    }
+  }, []);
 
   const handleSubmit = async (e: Event) => {
     e.preventDefault();

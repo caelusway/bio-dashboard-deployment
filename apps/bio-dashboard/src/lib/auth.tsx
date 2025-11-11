@@ -7,7 +7,17 @@ import type { Session, User } from '@supabase/supabase-js';
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+// Validate required env vars
+if (!supabaseUrl || !supabaseAnonKey) {
+  console.error('Missing Supabase configuration:', {
+    hasUrl: !!supabaseUrl,
+    hasKey: !!supabaseAnonKey,
+  });
+}
+
+export const supabase = supabaseUrl && supabaseAnonKey
+  ? createClient(supabaseUrl, supabaseAnonKey)
+  : null as any; // Will show error in UI
 
 export interface AuthUser {
   id: string;
@@ -33,6 +43,13 @@ export function AuthProvider({ children }: { children: preact.ComponentChildren 
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Check if Supabase is configured
+    if (!supabase) {
+      console.error('Supabase not configured - missing env vars');
+      setLoading(false);
+      return;
+    }
+
     // Check active session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
@@ -41,6 +58,9 @@ export function AuthProvider({ children }: { children: preact.ComponentChildren 
       } else {
         setLoading(false);
       }
+    }).catch((err) => {
+      console.error('Failed to get session:', err);
+      setLoading(false);
     });
 
     // Listen for auth changes
