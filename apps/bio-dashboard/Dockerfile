@@ -23,7 +23,7 @@ FROM nginx:alpine AS runner
 # Copy custom nginx config
 COPY <<EOF /etc/nginx/conf.d/default.conf
 server {
-    listen 3000;
+    listen 80;
     server_name _;
     root /usr/share/nginx/html;
     index index.html;
@@ -63,11 +63,11 @@ EOF
 COPY --from=build /app/dist /usr/share/nginx/html
 
 # Expose port
-EXPOSE 3000
+EXPOSE 80
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD wget --no-verbose --tries=1 --spider http://localhost:3000/health || exit 1
+  CMD wget --no-verbose --tries=1 --spider http://localhost:80/health || exit 1
 
 # Start nginx
 CMD ["nginx", "-g", "daemon off;"]
