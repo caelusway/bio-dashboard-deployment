@@ -6,7 +6,7 @@ WORKDIR /app
 # Install dependencies
 FROM base AS deps
 COPY package*.json ./
-RUN npm ci --legacy-peer-deps
+RUN npm install --legacy-peer-deps
 
 # Build the frontend
 FROM deps AS build

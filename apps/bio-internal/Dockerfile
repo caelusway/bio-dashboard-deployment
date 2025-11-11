@@ -5,7 +5,7 @@ WORKDIR /app
 
 # Install dependencies
 COPY package*.json ./
-RUN npm ci --omit=dev --legacy-peer-deps
+RUN npm install --production --legacy-peer-deps
 
 # Production image with Bun for runtime
 FROM oven/bun:1.2-alpine AS runner
