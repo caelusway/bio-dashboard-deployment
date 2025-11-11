@@ -32,10 +32,10 @@ const app = new Elysia()
   .use(cors({
     origin: isDev
       ? ['http://localhost:3000', 'http://localhost:3001', 'http://localhost:5173']
-      : (ctx) => {
-          const origin = ctx.request.headers.get('origin');
+      : (request) => {
+          const origin = request.headers.get('origin');
           if (origin && (origin.includes('.railway.app') || origin.includes('bio-dashboard'))) {
-            return origin;
+            return true;
           }
           return false;
         },
