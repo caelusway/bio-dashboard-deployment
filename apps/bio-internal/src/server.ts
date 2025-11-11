@@ -66,13 +66,38 @@ if (!isDev && existsSync(dashboardPath)) {
   console.log('📂 Serving static dashboard files from:', dashboardPath);
 
   // Serve static files - this wildcard route is added AFTER all API routes
-  // In Elysia, more specific routes (like /daos registered above) take precedence over wildcards
+  // We need to explicitly skip API paths to prevent interference
   app.get('*', async ({ path, set, request }) => {
     console.log('[Static] Request for:', path);
 
+    // Check if this is an API request - if so, return undefined to let API handlers process it
+    // This is critical because the wildcard can interfere with API routes
+    const isApiPath = path.startsWith('/api') ||
+                      path.startsWith('/v1') ||
+                      path.startsWith('/health') ||
+                      path.startsWith('/daos') ||
+                      path.startsWith('/api-docs');
+
+    if (isApiPath) {
+      // Check Accept header to determine if it's an API call vs browser navigation
+      const acceptHeader = request.headers.get('accept') || '';
+      const wantsJson = acceptHeader.includes('application/json');
+
+      console.log('[Static] API path detected:', path, 'wantsJson:', wantsJson);
+
+      // If client wants JSON, this is an API request - skip static file handler
+      if (wantsJson) {
+        console.log('[Static] Skipping - API request');
+        return; // Let API handlers deal with it
+      }
+
+      // Otherwise, it's a browser navigation to a frontend route (e.g., /daos page)
+      // Fall through to serve index.html
+    }
+
     try {
       // First, try to serve static files (JS, CSS, images, etc.)
-      if (path !== '/') {
+      if (path !== '/' && path.includes('.')) {
         const filePath = join(dashboardPath, path);
         console.log('[Static] Checking file:', filePath);
 
@@ -84,7 +109,7 @@ if (!isDev && existsSync(dashboardPath)) {
 
       // For all other paths (including root), serve index.html for SPA routing
       const indexPath = join(dashboardPath, 'index.html');
-      console.log('[Static] Serving index.html for SPA route');
+      console.log('[Static] Serving index.html for SPA route:', path);
 
       if (existsSync(indexPath)) {
         return Bun.file(indexPath);
