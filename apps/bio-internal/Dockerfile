@@ -5,18 +5,8 @@ WORKDIR /app
 
 # Install dependencies
 FROM base AS deps
-COPY package.json bun.lockb ./
-RUN bun install --frozen-lockfile --production
-
-# Development dependencies for build
-FROM base AS build-deps
-COPY package.json bun.lockb ./
-RUN bun install --frozen-lockfile
-
-# Build (if needed - not required for Bun but good for type checking)
-FROM build-deps AS build
-COPY . .
-RUN bun run check || true
+COPY package*.json ./
+RUN bun install --production
 
 # Production image
 FROM base AS runner
@@ -34,7 +24,7 @@ EXPOSE 4100
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD bun --eval "fetch('http://localhost:4100/health').then(r => r.ok ? process.exit(0) : process.exit(1))" || exit 1
+  CMD wget --spider -q http://localhost:4100/health || exit 1
 
 # Start the application
 CMD ["bun", "run", "src/index.ts"]
