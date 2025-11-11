@@ -1,0 +1,20 @@
+{
+  "name": "bio-dashboard-deployment",
+  "version": "1.0.0",
+  "description": "Bio Dashboard + Internal API - Railway Deployment",
+  "private": true,
+  "scripts": {
+    "dev:dashboard": "cd apps/bio-dashboard && bun run dev",
+    "dev:api": "cd apps/bio-internal && bun run dev",
+    "build": "./deploy.sh",
+    "start": "cd apps/bio-internal && NODE_ENV=production bun run src/index.ts",
+    "test:build": "cd apps/bio-dashboard && bun install && bun run build && cd ../bio-internal && bun install && NODE_ENV=production bun run src/index.ts"
+  },
+  "keywords": ["bio", "dashboard", "api", "railway"],
+  "author": "BioDAO",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0",
+    "bun": ">=1.0.0"
+  }
+}

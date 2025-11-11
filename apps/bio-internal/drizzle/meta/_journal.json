@@ -1,0 +1,48 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1761068777147,
+      "tag": "0000_mighty_impossible_man",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1761070163235,
+      "tag": "0001_furry_ulik",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1761070609230,
+      "tag": "0002_foamy_namorita",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1761071200000,
+      "tag": "0003_seed_bioprotocol",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1761073946375,
+      "tag": "0004_silky_harry_osborn",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1761075680000,
+      "tag": "0005_growth_indexes",
+      "breakpoints": true
+    }
+  ]
+}

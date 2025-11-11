@@ -1,0 +1,6 @@
+name = "bio-internal"
+version = "0.1.0"
+description = "BioProtocol internal Twitter API"
+
+[test]
+preload = ["./test/setup.ts"]
