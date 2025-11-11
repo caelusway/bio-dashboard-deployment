@@ -3,10 +3,12 @@
  * Connects to bio-internal Elysia API
  */
 
-// In production (Railway), API is served from same domain
-// In development, use localhost:4100
-const API_BASE_URL = import.meta.env.VITE_API_URL ||
-  (import.meta.env.PROD ? '' : 'http://localhost:4100');
+// API URL configuration
+// In production: Set VITE_API_URL environment variable to your Railway API service URL
+// In development: Uses localhost:4100
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:4100';
+
+console.log('[API] Using API base URL:', API_BASE_URL);
 
 export interface GrowthSource {
   id: string;
