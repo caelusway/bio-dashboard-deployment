@@ -1,52 +1,39 @@
 # Frontend Dashboard Dockerfile
-FROM oven/bun:1.2-alpine AS base
+FROM oven/bun:1.2-alpine AS build
 
 WORKDIR /app
 
-# Install dependencies
-FROM base AS deps
+# Install and build
 COPY package.json bun.lock ./
 RUN bun install --frozen-lockfile
-
-# Build the frontend
-FROM deps AS build
 COPY . .
 ARG VITE_API_URL
 ENV VITE_API_URL=$VITE_API_URL
 RUN bun run build
 
-# Production image with nginx
-FROM nginx:alpine
+# Production - serve with Bun
+FROM oven/bun:1.2-alpine
 
-# Copy custom nginx config for port 8080
-COPY <<EOF /etc/nginx/conf.d/default.conf
-server {
-    listen 8080;
-    root /usr/share/nginx/html;
-    index index.html;
+WORKDIR /app
+COPY --from=build /app/dist ./dist
 
-    gzip on;
-    gzip_types text/plain text/css text/xml text/javascript application/javascript application/json;
-
-    # SPA routing
-    location / {
-        try_files \$uri \$uri/ /index.html;
+# Simple static file server with Bun
+COPY <<EOF ./server.ts
+Bun.serve({
+  port: 3000,
+  fetch(req) {
+    const url = new URL(req.url);
+    if (url.pathname === "/health") {
+      return new Response("healthy", { status: 200 });
     }
-
-    # Health check
-    location /health {
-        return 200 "healthy\\n";
-        add_header Content-Type text/plain;
-    }
-}
+    const filePath = url.pathname === "/" ? "/index.html" : url.pathname;
+    const file = Bun.file(\`./dist\${filePath}\`);
+    return file.exists().then(exists =>
+      exists ? new Response(file) : new Response(Bun.file("./dist/index.html"))
+    );
+  }
+});
 EOF
 
-# Copy built assets
-COPY --from=build /app/dist /usr/share/nginx/html
-
-EXPOSE 8080
-
-HEALTHCHECK --interval=30s --timeout=3s CMD wget -q -O /dev/null http://localhost:8080/health || exit 1
-
-# Start nginx
-CMD ["nginx", "-g", "daemon off;"]
+EXPOSE 3000
+CMD ["bun", "run", "server.ts"]
