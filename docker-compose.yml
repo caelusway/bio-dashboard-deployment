@@ -14,6 +14,12 @@ services:
       SUPABASE_JWT_SECRET: ${SUPABASE_JWT_SECRET}
       TWITTER_BEARER_TOKEN: ${TWITTER_BEARER_TOKEN}
       LOG_LEVEL: ${LOG_LEVEL:-info}
+    ports:
+      - "4100"
+    labels:
+      - "coolify.managed=true"
+      - "coolify.name=backend"
+      - "coolify.port=4100"
     restart: unless-stopped
     networks:
       - app-network
@@ -24,6 +30,12 @@ services:
       dockerfile: Dockerfile
       args:
         VITE_API_URL: ${VITE_API_URL:-http://backend:4100}
+    ports:
+      - "3000"
+    labels:
+      - "coolify.managed=true"
+      - "coolify.name=frontend"
+      - "coolify.port=3000"
     restart: unless-stopped
     networks:
       - app-network
