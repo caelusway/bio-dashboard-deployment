@@ -70,7 +70,9 @@ interface TwitterAnalytics {
   }>;
 }
 
-const API_BASE = 'http://localhost:4100';
+// In production, API is served from same domain; in dev, use localhost
+const API_BASE = import.meta.env.VITE_API_URL ||
+  (import.meta.env.PROD ? '' : 'http://localhost:4100');
 
 export function DAODetail({ slug }: { slug: string }) {
   const [dao, setDao] = useState<DAODetails | null>(null);

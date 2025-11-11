@@ -106,9 +106,12 @@ export function Overview() {
       console.log('[Overview] Loading data for window:', window);
 
       // Load both growth sources and DAO stats
+      const API_BASE = import.meta.env.VITE_API_URL ||
+        (import.meta.env.PROD ? '' : 'http://localhost:4100');
+
       const [growthResponse, daoResponse] = await Promise.all([
         api.getGrowthSources(window),
-        fetch('http://localhost:4100/daos/stats/weekly').then(r => r.json()),
+        fetch(`${API_BASE}/daos/stats/weekly`).then(r => r.json()),
       ]);
 
       console.log('[Overview] API Response:', growthResponse);

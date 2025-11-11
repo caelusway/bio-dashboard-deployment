@@ -31,7 +31,9 @@ interface PaginationInfo {
   hasMore: boolean;
 }
 
-const API_BASE = 'http://localhost:4100';
+// In production, API is served from same domain; in dev, use localhost
+const API_BASE = import.meta.env.VITE_API_URL ||
+  (import.meta.env.PROD ? '' : 'http://localhost:4100');
 
 export function DAOs() {
   const [daos, setDaos] = useState<DAOSummary[]>([]);
