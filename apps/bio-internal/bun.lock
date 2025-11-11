@@ -5,7 +5,6 @@
       "name": "@bio-sync/bio-internal",
       "dependencies": {
         "@elysiajs/cors": "^1.4.0",
-        "@elysiajs/static": "^1.4.6",
         "@elysiajs/swagger": "^1.0.0",
         "@supabase/supabase-js": "^2.39.7",
         "drizzle-orm": "^0.44.6",
@@ -33,8 +32,6 @@
     "@drizzle-team/brocli": ["@drizzle-team/brocli@0.10.2", "", {}, "sha512-z33Il7l5dKjUgGULTqBsQBQwckHh5AbIuxhdsIxDDiZAzBOrZO6q9ogcWC65kU382AfynTfgNumVcNIjuIua6w=="],
 
     "@elysiajs/cors": ["@elysiajs/cors@1.4.0", "", { "peerDependencies": { "elysia": ">= 1.4.0" } }, "sha512-pb0SCzBfFbFSYA/U40HHO7R+YrcXBJXOWgL20eSViK33ol1e20ru2/KUaZYo5IMUn63yaTJI/bQERuQ+77ND8g=="],
-
-    "@elysiajs/static": ["@elysiajs/static@1.4.6", "", { "peerDependencies": { "elysia": ">= 1.4.0" } }, "sha512-cd61aY/DHOVhlnBjzTBX8E1XANIrsCH8MwEGHeLMaZzNrz0gD4Q8Qsde2dFMzu81I7ZDaaZ2Rim9blSLtUrYBg=="],
 
     "@elysiajs/swagger": ["@elysiajs/swagger@1.3.1", "", { "dependencies": { "@scalar/themes": "^0.9.52", "@scalar/types": "^0.0.12", "openapi-types": "^12.1.3", "pathe": "^1.1.2" }, "peerDependencies": { "elysia": ">= 1.3.0" } }, "sha512-LcbLHa0zE6FJKWPWKsIC/f+62wbDv3aXydqcNPVPyqNcaUgwvCajIi+5kHEU6GO3oXUCpzKaMsb3gsjt8sLzFQ=="],
 

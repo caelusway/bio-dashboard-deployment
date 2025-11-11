@@ -1,7 +1,6 @@
 import { Elysia } from 'elysia';
 import { cors } from '@elysiajs/cors';
 import { swagger } from '@elysiajs/swagger';
-import { staticPlugin } from '@elysiajs/static';
 import { healthRoutes } from './routes/health';
 import { twitterRoutes } from './routes/twitter';
 import { growthRoutes } from './routes/growth';
@@ -52,17 +51,27 @@ export const app = new Elysia()
 if (!isDev && existsSync(dashboardPath)) {
   console.log('📂 Serving static dashboard files from:', dashboardPath);
 
-  app.use(staticPlugin({
-    assets: dashboardPath,
-    prefix: '/',
-  }))
-  // Fallback to index.html for SPA routing
-  .get('*', ({ set }) => {
+  // Serve static assets using Bun's native file serving
+  app.get('*', ({ path, set }) => {
+    // Skip API routes
+    if (path.startsWith('/api') || path.startsWith('/v1') || path.startsWith('/health')) {
+      return;
+    }
+
     try {
+      // Try to serve the requested file
+      const filePath = join(dashboardPath, path === '/' ? 'index.html' : path);
+
+      if (existsSync(filePath)) {
+        return Bun.file(filePath);
+      }
+
+      // Fallback to index.html for SPA routing
       const indexPath = join(dashboardPath, 'index.html');
       if (existsSync(indexPath)) {
         return Bun.file(indexPath);
       }
+
       set.status = 404;
       return { error: 'Dashboard not found' };
     } catch (e) {
