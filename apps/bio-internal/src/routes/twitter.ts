@@ -2,8 +2,6 @@ import { Elysia, t } from 'elysia';
 import { db } from '../db/client';
 import { twitterPosts } from '../db/schema';
 import { syncTwitterAccounts } from '../jobs/twitterSync';
-import { authMiddleware } from '../middleware/auth';
-import { roleGuard } from '../middleware/roles';
 import { eq, and, desc, sql } from 'drizzle-orm';
 import { getEngagementHistory, getFollowerHistory } from '../services/twitterAnalytics';
 
@@ -29,8 +27,7 @@ const ingestSchema = t.Object({
 });
 
 export const twitterRoutes = new Elysia({ prefix: '/v1/twitter' })
-  .use(authMiddleware)
-  .use(roleGuard(['admin', 'analyst']))
+  // Auth middleware removed - these are internal API endpoints
   .post('/ingest', async ({ body }) => {
     const { orgId, daoId, posts } = ingestSchema.parse(body);
 
