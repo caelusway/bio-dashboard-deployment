@@ -35,9 +35,11 @@ const app = new Elysia()
       : (request) => {
           const origin = request.headers.get('origin');
           if (!origin) return false;
-          // Allow Coolify domains (sslip.io), Railway domains, and bio-dashboard domains
+          // Allow Coolify domains (sslip.io), Railway domains, ngrok domains, and bio-dashboard domains
           return origin.includes('.sslip.io') ||
                  origin.includes('.railway.app') ||
+                 origin.includes('.ngrok-free.app') ||
+                 origin.includes('.ngrok.app') ||
                  origin.includes('bio-dashboard') ||
                  origin.includes('localhost');
         },

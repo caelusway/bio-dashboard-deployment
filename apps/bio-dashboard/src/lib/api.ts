@@ -4,7 +4,8 @@
  */
 
 // API URL configuration
-// In production: default to same-origin requests unless VITE_API_URL overrides
+// IMPORTANT: In Coolify, you MUST set VITE_API_URL to your backend service URL
+// Example: https://your-backend-domain.sslip.io or https://your-backend.ngrok-free.app
 // In development: use localhost:4100 for API calls
 const configuredBaseUrl = (import.meta.env.VITE_API_URL ?? '').trim();
 const fallbackBaseUrl = import.meta.env.DEV ? 'http://localhost:4100' : '';
