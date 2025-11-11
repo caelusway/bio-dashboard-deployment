@@ -1,0 +1,12 @@
+[phases.setup]
+nixPkgs = ["bun"]
+
+[phases.install]
+cmds = ["./deploy.sh"]
+
+[phases.build]
+cmds = ["echo 'Build completed in install phase'"]
+
+[start]
+cmd = "cd apps/bio-internal && bun run src/index.ts"
+
