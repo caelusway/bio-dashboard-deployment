@@ -3,7 +3,7 @@ FROM node:20-alpine AS base
 
 WORKDIR /app
 
-# Install dependencies
+# Install ALL dependencies (including devDependencies needed for build)
 FROM base AS deps
 COPY package*.json ./
 RUN npm install --legacy-peer-deps
@@ -11,6 +11,9 @@ RUN npm install --legacy-peer-deps
 # Build the frontend
 FROM deps AS build
 COPY . .
+# Pass VITE_API_URL as build arg if provided
+ARG VITE_API_URL
+ENV VITE_API_URL=$VITE_API_URL
 RUN npm run build
 
 # Production image with nginx to serve static files
