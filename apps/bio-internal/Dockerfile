@@ -8,7 +8,7 @@ FROM base AS deps
 COPY package*.json ./
 RUN bun install --production
 
-# Production image
+# Production image - use Bun for runtime
 FROM base AS runner
 ENV NODE_ENV=production
 ENV PORT=4100
@@ -23,7 +23,7 @@ COPY . .
 EXPOSE 4100
 
 # Health check
-HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
   CMD wget --spider -q http://localhost:4100/health || exit 1
 
 # Start the application

@@ -1,17 +1,17 @@
 # Frontend Dashboard Dockerfile
-FROM oven/bun:1.2-alpine AS base
+FROM node:20-alpine AS base
 
 WORKDIR /app
 
 # Install dependencies
 FROM base AS deps
 COPY package*.json ./
-RUN bun install
+RUN npm ci --legacy-peer-deps
 
 # Build the frontend
 FROM deps AS build
 COPY . .
-RUN bun run build
+RUN npm run build
 
 # Production image with nginx to serve static files
 FROM nginx:alpine AS runner
