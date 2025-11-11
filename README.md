@@ -2,7 +2,22 @@
 
 Production deployment repository for Bio Dashboard and Internal API.
 
-## 🚀 Quick Deploy to Railway
+## 🚀 Quick Deploy with PM2 (Recommended)
+
+**One-line deployment on any Linux server:**
+
+```bash
+git clone https://github.com/your-username/bio-dashboard-deployment.git
+cd bio-dashboard-deployment
+chmod +x setup-pm2.sh
+./setup-pm2.sh
+```
+
+See [PM2_DEPLOYMENT.md](./PM2_DEPLOYMENT.md) for full guide.
+
+---
+
+## 🚀 Alternative: Deploy to Railway
 
 1. **Push to GitHub:**
    ```bash
@@ -74,9 +89,10 @@ NODE_ENV=production bun run src/index.ts
 
 ## 📚 Documentation
 
-- [QUICKSTART.md](./QUICKSTART.md) - Quick deployment guide
-- [RAILWAY_DEPLOYMENT.md](./RAILWAY_DEPLOYMENT.md) - Full documentation
-- [DEPLOYMENT_SUMMARY.md](./DEPLOYMENT_SUMMARY.md) - Architecture overview
+- [PM2_DEPLOYMENT.md](./PM2_DEPLOYMENT.md) - **PM2 deployment guide (Recommended)**
+- [COOLIFY_SETUP.md](./COOLIFY_SETUP.md) - Coolify deployment with Docker
+- [COOLIFY_ENV_SETUP.md](./COOLIFY_ENV_SETUP.md) - Environment variables for Coolify
+- [RAILWAY_DEPLOYMENT.md](./RAILWAY_DEPLOYMENT.md) - Railway deployment guide
 
 ## 🛠️ Tech Stack
 
