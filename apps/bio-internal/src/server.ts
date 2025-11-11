@@ -13,7 +13,21 @@ const dashboardPath = resolve(import.meta.dir, '../../bio-dashboard/dist');
 
 console.log(`🔧 Environment: ${isDev ? 'development' : 'production'}`);
 console.log(`📁 Dashboard path: ${dashboardPath}`);
+console.log(`📂 Working directory: ${process.cwd()}`);
+console.log(`📍 Script location: ${import.meta.dir}`);
 console.log(`📦 Dashboard exists: ${existsSync(dashboardPath)}`);
+
+// List files in dashboard path if it exists
+if (existsSync(dashboardPath)) {
+  try {
+    const { readdirSync } = await import('fs');
+    console.log(`📄 Dashboard files:`, readdirSync(dashboardPath));
+  } catch (e) {
+    console.log(`⚠️  Could not list dashboard files:`, e);
+  }
+} else {
+  console.log(`❌ Dashboard build not found! Make sure deploy.sh ran successfully.`);
+}
 
 export const app = new Elysia()
   // Enable CORS for dashboard
@@ -51,37 +65,38 @@ export const app = new Elysia()
 if (!isDev && existsSync(dashboardPath)) {
   console.log('📂 Serving static dashboard files from:', dashboardPath);
 
-  // Use onAfterHandle to serve static files ONLY if no route matched
-  // This ensures API routes always take precedence
-  app.onAfterHandle(({ response, path, set }) => {
-    // If a route already returned a response, don't interfere
-    if (response !== undefined) {
-      return response;
-    }
+  // Serve static files - this wildcard route is added AFTER all API routes
+  // In Elysia, more specific routes (like /daos registered above) take precedence over wildcards
+  app.get('*', async ({ path, set, request }) => {
+    console.log('[Static] Request for:', path);
 
     try {
       // First, try to serve static files (JS, CSS, images, etc.)
-      // These have file extensions and exist in the dist folder
-      if (path !== '/' && path.includes('.')) {
+      if (path !== '/') {
         const filePath = join(dashboardPath, path);
+        console.log('[Static] Checking file:', filePath);
+
         if (existsSync(filePath)) {
+          console.log('[Static] Serving file:', filePath);
           return Bun.file(filePath);
         }
       }
 
-      // For everything else (root, /daos, /platform/twitter, etc.),
-      // serve index.html and let the frontend router handle it
+      // For all other paths (including root), serve index.html for SPA routing
       const indexPath = join(dashboardPath, 'index.html');
+      console.log('[Static] Serving index.html for SPA route');
+
       if (existsSync(indexPath)) {
         return Bun.file(indexPath);
       }
 
+      console.error('[Static] index.html not found at:', indexPath);
       set.status = 404;
       return { error: 'Dashboard not found' };
     } catch (e) {
-      console.error('Static file serving error:', e);
+      console.error('[Static] Error:', e);
       set.status = 500;
-      return { error: 'Internal server error' };
+      return { error: 'Internal server error', details: String(e) };
     }
   });
 } else if (!isDev) {
