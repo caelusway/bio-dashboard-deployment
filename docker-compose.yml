@@ -42,9 +42,6 @@ services:
     restart: unless-stopped
     networks:
       - bio-network
-    labels:
-      - "coolify.managed=true"
-      - "coolify.port=3000"
 
 networks:
   bio-network:
