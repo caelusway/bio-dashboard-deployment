@@ -5,14 +5,64 @@ echo "🚀 Bio Dashboard PM2 Deployment Script"
 echo "========================================"
 echo ""
 
+# Check for required system dependencies
+echo "🔍 Checking system dependencies..."
+MISSING_DEPS=()
+
+if ! command -v unzip &> /dev/null; then
+    MISSING_DEPS+=("unzip")
+fi
+
+if ! command -v curl &> /dev/null; then
+    MISSING_DEPS+=("curl")
+fi
+
+if [ ${#MISSING_DEPS[@]} -ne 0 ]; then
+    echo "❌ Missing required dependencies: ${MISSING_DEPS[*]}"
+    echo ""
+    echo "Please install them first:"
+    echo ""
+    echo "  Ubuntu/Debian:"
+    echo "    sudo apt update && sudo apt install -y unzip curl"
+    echo ""
+    echo "  macOS:"
+    echo "    brew install unzip curl"
+    echo ""
+    echo "  RHEL/CentOS/Fedora:"
+    echo "    sudo yum install -y unzip curl"
+    echo ""
+    exit 1
+fi
+
+echo "✅ System dependencies ok"
+echo ""
+
 # Check if bun is installed
 if ! command -v bun &> /dev/null; then
-    echo "❌ Bun is not installed. Installing Bun..."
+    echo "📦 Installing Bun..."
     curl -fsSL https://bun.sh/install | bash
     export BUN_INSTALL="$HOME/.bun"
     export PATH="$BUN_INSTALL/bin:$PATH"
-    source ~/.bashrc 2>/dev/null || source ~/.zshrc 2>/dev/null || true
+
+    # Try to source shell config
+    if [ -f "$HOME/.bashrc" ]; then
+        source "$HOME/.bashrc" 2>/dev/null || true
+    elif [ -f "$HOME/.zshrc" ]; then
+        source "$HOME/.zshrc" 2>/dev/null || true
+    fi
+
+    # Verify bun is now available
+    if ! command -v bun &> /dev/null; then
+        echo "⚠️  Bun installed but not in PATH. Manually adding..."
+        export PATH="$HOME/.bun/bin:$PATH"
+    fi
+
+    echo "✅ Bun installed successfully"
+else
+    echo "✅ Bun already installed"
 fi
+
+echo ""
 
 # Check if pm2 is installed
 if ! command -v pm2 &> /dev/null; then
