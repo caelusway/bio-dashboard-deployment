@@ -51,22 +51,26 @@ export const app = new Elysia()
 if (!isDev && existsSync(dashboardPath)) {
   console.log('📂 Serving static dashboard files from:', dashboardPath);
 
-  // Serve static assets using Bun's native file serving
-  app.get('*', ({ path, set }) => {
-    // Skip API routes
-    if (path.startsWith('/api') || path.startsWith('/v1') || path.startsWith('/health')) {
-      return;
+  // Use onAfterHandle to serve static files ONLY if no route matched
+  // This ensures API routes always take precedence
+  app.onAfterHandle(({ response, path, set }) => {
+    // If a route already returned a response, don't interfere
+    if (response !== undefined) {
+      return response;
     }
 
     try {
-      // Try to serve the requested file
-      const filePath = join(dashboardPath, path === '/' ? 'index.html' : path);
-
-      if (existsSync(filePath)) {
-        return Bun.file(filePath);
+      // First, try to serve static files (JS, CSS, images, etc.)
+      // These have file extensions and exist in the dist folder
+      if (path !== '/' && path.includes('.')) {
+        const filePath = join(dashboardPath, path);
+        if (existsSync(filePath)) {
+          return Bun.file(filePath);
+        }
       }
 
-      // Fallback to index.html for SPA routing
+      // For everything else (root, /daos, /platform/twitter, etc.),
+      // serve index.html and let the frontend router handle it
       const indexPath = join(dashboardPath, 'index.html');
       if (existsSync(indexPath)) {
         return Bun.file(indexPath);
@@ -75,6 +79,7 @@ if (!isDev && existsSync(dashboardPath)) {
       set.status = 404;
       return { error: 'Dashboard not found' };
     } catch (e) {
+      console.error('Static file serving error:', e);
       set.status = 500;
       return { error: 'Internal server error' };
     }
