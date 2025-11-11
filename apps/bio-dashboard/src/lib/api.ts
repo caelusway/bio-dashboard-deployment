@@ -3,7 +3,10 @@
  * Connects to bio-internal Elysia API
  */
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:4100';
+// In production (Railway), API is served from same domain
+// In development, use localhost:4100
+const API_BASE_URL = import.meta.env.VITE_API_URL ||
+  (import.meta.env.PROD ? '' : 'http://localhost:4100');
 
 export interface GrowthSource {
   id: string;
