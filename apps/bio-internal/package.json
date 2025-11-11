@@ -21,6 +21,7 @@
   },
   "dependencies": {
     "@elysiajs/cors": "^1.4.0",
+    "@elysiajs/static": "^1.4.6",
     "@elysiajs/swagger": "^1.0.0",
     "@supabase/supabase-js": "^2.39.7",
     "drizzle-orm": "^0.44.6",
