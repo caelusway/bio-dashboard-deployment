@@ -1,11 +1,11 @@
 # Backend API Dockerfile
-FROM node:20-alpine AS deps
+FROM oven/bun:1.2-alpine AS deps
 
 WORKDIR /app
 
-# Install dependencies
-COPY package.json package-lock.json ./
-RUN npm ci --omit=dev
+# Install dependencies using Bun
+COPY package.json bun.lock ./
+RUN bun install --frozen-lockfile --production
 
 # Production image with Bun for runtime
 FROM oven/bun:1.2-alpine AS runner
