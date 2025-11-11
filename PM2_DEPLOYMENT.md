@@ -184,11 +184,43 @@ Rebuild and restart:
 
 ## Updating Your Application
 
-```bash
-# Pull latest changes
-git pull origin main
+### Quick Update (Recommended)
 
-# Run setup script to rebuild and restart
+Use the automated update script:
+
+```bash
+./update.sh
+```
+
+This will:
+1. Pull latest changes from git
+2. Ask what to update (backend/frontend/both)
+3. Install dependencies
+4. Rebuild frontend (if needed)
+5. Restart services with PM2
+
+### Manual Update
+
+**Update backend only:**
+```bash
+git pull origin main
+cd apps/bio-internal
+bun install
+pm2 restart bio-backend
+```
+
+**Update frontend only:**
+```bash
+git pull origin main
+cd apps/bio-dashboard
+bun install
+VITE_API_URL=your-backend-url bun run build
+pm2 restart bio-frontend
+```
+
+**Update both:**
+```bash
+git pull origin main
 ./setup-pm2.sh
 ```
 
