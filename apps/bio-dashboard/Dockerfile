@@ -1,13 +1,13 @@
 # Frontend Dashboard Dockerfile
 # Updated for Coolify deployment
-FROM node:20-alpine AS base
+FROM oven/bun:1.2-alpine AS base
 
 WORKDIR /app
 
 # Install ALL dependencies (including devDependencies needed for build)
 FROM base AS deps
-COPY package.json package-lock.json ./
-RUN npm ci
+COPY package.json bun.lock ./
+RUN bun install --frozen-lockfile
 
 # Build the frontend
 FROM deps AS build
@@ -15,7 +15,7 @@ COPY . .
 # Pass VITE_API_URL as build arg if provided
 ARG VITE_API_URL
 ENV VITE_API_URL=$VITE_API_URL
-RUN npm run build
+RUN bun run build
 
 # Production image with nginx to serve static files
 FROM nginx:alpine AS runner
