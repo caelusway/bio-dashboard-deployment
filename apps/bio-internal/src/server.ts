@@ -16,15 +16,7 @@ const app = new Elysia()
   .use(cors({
     origin: isDev
       ? ['http://localhost:3000', 'http://localhost:3001', 'http://localhost:5173']
-      : (ctx) => {
-          // In production, allow requests from Railway frontend domain
-          const origin = ctx.request.headers.get('origin');
-          // Allow Railway domains and your custom domain
-          if (origin && (origin.includes('.railway.app') || origin.includes('bio-dashboard'))) {
-            return origin;
-          }
-          return false;
-        },
+      : true, // Allow all origins in production - Railway frontend will connect
     credentials: true,
   }))
   .use(
