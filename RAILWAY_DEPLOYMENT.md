@@ -56,12 +56,26 @@ Railway will automatically:
 2. Install dependencies for both apps
 3. Start the server with `cd apps/bio-internal && NODE_ENV=production bun run src/index.ts`
 
-### 4. Access Your App
+### 4. Generate a Public Domain
 
-Once deployed, Railway will provide you with a URL like:
+Railway doesn't expose your service by default. To make it publicly accessible:
+
+1. Go to your Railway project
+2. Click on your service
+3. Go to **Settings** tab
+4. Scroll down to **Networking** section
+5. Click **Generate Domain** button
+6. Railway will generate a public URL like `your-app-production.up.railway.app`
+
+Alternatively, you can add a custom domain in the same section.
+
+### 5. Access Your App
+
+Once deployed and domain generated, you can access:
 - `https://your-app.up.railway.app` - Dashboard (frontend)
 - `https://your-app.up.railway.app/v1/*` - API endpoints
 - `https://your-app.up.railway.app/api-docs` - API documentation
+- `https://your-app.up.railway.app/api` - API info endpoint
 
 ## Project Structure
 
