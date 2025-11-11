@@ -5,11 +5,8 @@ WORKDIR /app
 
 # Install ALL dependencies (including devDependencies needed for build)
 FROM base AS deps
-COPY package*.json ./
-RUN npm install --legacy-peer-deps && \
-    ls -la node_modules/.bin/ && \
-    echo "Node version: $(node --version)" && \
-    echo "NPM version: $(npm --version)"
+COPY package.json package-lock.json ./
+RUN npm ci
 
 # Build the frontend
 FROM deps AS build
@@ -17,10 +14,7 @@ COPY . .
 # Pass VITE_API_URL as build arg if provided
 ARG VITE_API_URL
 ENV VITE_API_URL=$VITE_API_URL
-# Ensure node_modules/.bin is in PATH and run build
-RUN export PATH="$PATH:/app/node_modules/.bin" && \
-    which vite && \
-    npm run build
+RUN npm run build
 
 # Production image with nginx to serve static files
 FROM nginx:alpine AS runner

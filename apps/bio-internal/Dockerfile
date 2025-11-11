@@ -4,8 +4,8 @@ FROM node:20-alpine AS deps
 WORKDIR /app
 
 # Install dependencies
-COPY package*.json ./
-RUN npm install --production --legacy-peer-deps
+COPY package.json package-lock.json ./
+RUN npm ci --omit=dev
 
 # Production image with Bun for runtime
 FROM oven/bun:1.2-alpine AS runner
