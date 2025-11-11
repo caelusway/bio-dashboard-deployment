@@ -248,3 +248,45 @@ export const growthJobRelations = relations(growthJobs, ({ one }) => ({
     references: [growthSources.id],
   }),
 }));
+
+// ================================
+// AUTHENTICATION & INVITES
+// ================================
+
+export const inviteStatusEnum = pgEnum('invite_status', [
+  'pending',
+  'accepted',
+  'expired',
+  'revoked',
+]);
+
+export const userRoleEnum = pgEnum('user_role', [
+  'admin',
+  'member',
+]);
+
+export const invites = pgTable('invites', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  email: text('email').notNull().unique(),
+  invitedBy: text('invited_by').notNull(), // email of admin who sent invite
+  status: inviteStatusEnum('status').default('pending').notNull(),
+  inviteToken: text('invite_token').notNull().unique(),
+  expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+  acceptedAt: timestamp('accepted_at', { withTimezone: true }),
+  userId: uuid('user_id'), // References Supabase auth.users.id after signup
+  metadata: jsonb('metadata').default({}),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow(),
+});
+
+export const users = pgTable('users', {
+  id: uuid('id').primaryKey(), // Same as Supabase auth.users.id
+  email: text('email').notNull().unique(),
+  role: userRoleEnum('role').default('member').notNull(),
+  fullName: text('full_name'),
+  avatarUrl: text('avatar_url'),
+  lastLoginAt: timestamp('last_login_at', { withTimezone: true }),
+  metadata: jsonb('metadata').default({}),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow(),
+});

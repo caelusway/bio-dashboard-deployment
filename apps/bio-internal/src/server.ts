@@ -8,6 +8,8 @@ import { healthRoutes } from './routes/health';
 import { twitterRoutes } from './routes/twitter';
 import { growthRoutes } from './routes/growth';
 import { daoRoutes } from './routes/daos';
+import { authRoutes } from './routes/auth';
+import { inviteRoutes } from './routes/invites';
 
 const isDev = process.env.NODE_ENV !== 'production';
 
@@ -21,7 +23,7 @@ const hasDashboardBuild = existsSync(dashboardIndexPath);
 console.log(`📦 Dashboard dist present: ${hasDashboardBuild ? 'yes' : 'no'}`);
 console.log(`📁 Dashboard dist path: ${dashboardDistPath}`);
 
-const apiPrefixes = ['/api', '/v1', '/daos', '/growth', '/health', '/api-docs', '/swagger'];
+const apiPrefixes = ['/api', '/v1', '/daos', '/growth', '/health', '/auth', '/invites', '/api-docs', '/swagger'];
 
 const shouldServeDashboard = (pathname: string) => {
   return !apiPrefixes.some((prefix) => pathname.startsWith(prefix));
@@ -51,6 +53,8 @@ const app = new Elysia()
     environment: isDev ? 'development' : 'production',
   }))
   .use(healthRoutes)
+  .use(authRoutes)
+  .use(inviteRoutes)
   .use(twitterRoutes)
   .use(growthRoutes)
   .use(daoRoutes);

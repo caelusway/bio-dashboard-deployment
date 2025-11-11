@@ -1,42 +1,76 @@
 import { Elysia } from 'elysia';
-import { createClient } from '@supabase/supabase-js';
-import { env } from '../config/env';
+import { supabase } from '../lib/supabase';
+import { db } from '../db/client';
+import { users } from '../db/schema';
+import { eq } from 'drizzle-orm';
 
-const supabase = createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY, {
-  auth: {
-    persistSession: false,
-    autoRefreshToken: false,
-  },
-});
+export interface AuthUser {
+  id: string;
+  email: string;
+  role: 'admin' | 'member';
+  fullName?: string | null;
+}
 
-export const authMiddleware = new Elysia({ prefix: '/v1' })
-  .on('request', async ({ request, set, path }) => {
-    // Skip auth for OPTIONS requests (CORS preflight)
-    if (request.method === 'OPTIONS') {
-      return;
-    }
+// Extract JWT token from Authorization header
+const extractToken = (authorization: string | null): string | null => {
+  if (!authorization) return null;
+  const parts = authorization.split(' ');
+  if (parts[0] !== 'Bearer' || parts.length !== 2) return null;
+  return parts[1];
+};
 
-    // Skip auth for routes outside /v1/* (e.g., /api/growth)
-    if (!path.startsWith('/v1/')) {
-      return;
-    }
+// Auth middleware - protects routes and adds user to context
+export const auth = () =>
+  new Elysia({ name: 'auth' })
+    .derive(async ({ request, set }) => {
+      const authorization = request.headers.get('authorization');
+      const token = extractToken(authorization);
 
-    const authorization = request.headers.get('authorization');
-    const token = authorization?.startsWith('Bearer ')
-      ? authorization.slice('Bearer '.length)
-      : undefined;
+      if (!token) {
+        set.status = 401;
+        throw new Error('No authorization token provided');
+      }
 
-    if (!token) {
-      set.status = 401;
-      return { error: 'Unauthorized' };
-    }
+      // Verify JWT with Supabase
+      const {
+        data: { user: supabaseUser },
+        error,
+      } = await supabase.auth.getUser(token);
 
-    const { data, error } = await supabase.auth.getUser(token);
+      if (error || !supabaseUser) {
+        set.status = 401;
+        throw new Error('Invalid or expired token');
+      }
 
-    if (error || !data.user) {
-      set.status = 401;
-      return { error: 'Invalid token' };
-    }
+      // Get user details from our database
+      const [dbUser] = await db
+        .select()
+        .from(users)
+        .where(eq(users.id, supabaseUser.id))
+        .limit(1);
 
-    request.headers.set('x-user-id', data.user.id);
-  });
+      if (!dbUser) {
+        set.status = 401;
+        throw new Error('User not found in database');
+      }
+
+      const user: AuthUser = {
+        id: dbUser.id,
+        email: dbUser.email,
+        role: dbUser.role,
+        fullName: dbUser.fullName,
+      };
+
+      return { user };
+    });
+
+// Admin-only middleware
+export const adminOnly = () =>
+  new Elysia({ name: 'admin-only' })
+    .use(auth())
+    .onBeforeHandle(({ user, set }) => {
+      if (user?.role !== 'admin') {
+        set.status = 403;
+        throw new Error('Forbidden: Admin access required');
+      }
+    });
