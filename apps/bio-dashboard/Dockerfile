@@ -1,4 +1,5 @@
 # Frontend Dashboard Dockerfile
+# Updated for Coolify deployment
 FROM node:20-alpine AS base
 
 WORKDIR /app
