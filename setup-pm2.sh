@@ -160,7 +160,7 @@ module.exports = {
       name: 'bio-frontend',
       cwd: './apps/bio-dashboard',
       script: 'bunx',
-      args: 'serve dist -p 3000 -s',
+      args: '--bun serve dist -l 3000',
       interpreter: 'none',
       env: {
         NODE_ENV: 'production'
