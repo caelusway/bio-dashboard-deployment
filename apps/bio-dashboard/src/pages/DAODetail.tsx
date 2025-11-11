@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from 'preact/hooks';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { formatNumber } from '../lib/utils';
+import { API_BASE_URL } from '../lib/api';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -70,10 +71,6 @@ interface TwitterAnalytics {
   }>;
 }
 
-// In production, API is served from same domain; in dev, use localhost
-const API_BASE = import.meta.env.VITE_API_URL ||
-  (import.meta.env.PROD ? '' : 'http://localhost:4100');
-
 export function DAODetail({ slug }: { slug: string }) {
   const [dao, setDao] = useState<DAODetails | null>(null);
   const [followers, setFollowers] = useState<FollowerSnapshot[]>([]);
@@ -96,9 +93,9 @@ export function DAODetail({ slug }: { slug: string }) {
       setLoading(true);
 
       const [daoResponse, followersResponse, analyticsResponse] = await Promise.all([
-        fetch(`${API_BASE}/daos/${slug}`),
-        fetch(`${API_BASE}/daos/${slug}/followers?days=${timeRange}`),
-        fetch(`${API_BASE}/daos/${slug}/analytics?days=${timeRange}`),
+        fetch(`${API_BASE_URL}/daos/${slug}`),
+        fetch(`${API_BASE_URL}/daos/${slug}/followers?days=${timeRange}`),
+        fetch(`${API_BASE_URL}/daos/${slug}/analytics?days=${timeRange}`),
       ]);
 
       const daoData = await daoResponse.json();

@@ -4,9 +4,12 @@
  */
 
 // API URL configuration
-// In production: Set VITE_API_URL environment variable to your Railway API service URL
-// In development: Uses localhost:4100
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:4100';
+// In production: default to same-origin requests unless VITE_API_URL overrides
+// In development: use localhost:4100 for API calls
+const configuredBaseUrl = (import.meta.env.VITE_API_URL ?? '').trim();
+const fallbackBaseUrl = import.meta.env.DEV ? 'http://localhost:4100' : '';
+
+export const API_BASE_URL = configuredBaseUrl || fallbackBaseUrl;
 
 console.log('[API] Using API base URL:', API_BASE_URL);
 

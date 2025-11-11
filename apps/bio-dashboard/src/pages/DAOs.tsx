@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'preact/hooks';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { formatNumber } from '../lib/utils';
+import { API_BASE_URL } from '../lib/api';
 
 interface DAOSummary {
   id: string;
@@ -31,10 +32,6 @@ interface PaginationInfo {
   hasMore: boolean;
 }
 
-// In production, API is served from same domain; in dev, use localhost
-const API_BASE = import.meta.env.VITE_API_URL ||
-  (import.meta.env.PROD ? '' : 'http://localhost:4100');
-
 export function DAOs() {
   const [daos, setDaos] = useState<DAOSummary[]>([]);
   const [ecosystem, setEcosystem] = useState<EcosystemStats | null>(null);
@@ -53,8 +50,8 @@ export function DAOs() {
       setLoading(true);
 
       const [daosResponse, ecosystemResponse] = await Promise.all([
-        fetch(`${API_BASE}/daos?page=${currentPage}&limit=12`),
-        fetch(`${API_BASE}/daos/stats/ecosystem`),
+        fetch(`${API_BASE_URL}/daos?page=${currentPage}&limit=12`),
+        fetch(`${API_BASE_URL}/daos/stats/ecosystem`),
       ]);
 
       const daosData = await daosResponse.json();
