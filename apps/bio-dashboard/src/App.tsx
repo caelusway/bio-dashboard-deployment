@@ -1,4 +1,5 @@
 import { Router, Route } from 'preact-router';
+import { AuthProvider, useAuth } from './lib/auth';
 import { Header } from './components/Header';
 import { Sidebar } from './components/Sidebar';
 import { Overview } from './pages/Overview';
@@ -6,18 +7,49 @@ import { Platform } from './pages/Platform';
 import { Analytics } from './pages/Analytics';
 import { DAOs } from './pages/DAOs';
 import { DAODetail } from './pages/DAODetail';
+import { Login } from './pages/Login';
+import { Signup } from './pages/Signup';
+import { Invites } from './pages/Invites';
 
-export function App() {
+function ProtectedRoutes() {
+  const { user, loading } = useAuth();
+
   const PlatformWithKey = ({ platform }: { platform: string }) => {
-    // Force remount when platform changes by using platform as key
     return <Platform key={platform} platform={platform} />;
   };
 
   const DAODetailWithKey = ({ slug }: { slug: string }) => {
-    // Force remount when slug changes by using slug as key
     return <DAODetail key={slug} slug={slug} />;
   };
 
+  const SignupWithToken = ({ token }: { token: string }) => {
+    return <Signup token={token} />;
+  };
+
+  // Show loading state
+  if (loading) {
+    return (
+      <div class="flex h-screen bg-black items-center justify-center">
+        <div class="text-center">
+          <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500 mx-auto mb-4"></div>
+          <p class="text-gray-400">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Public routes (login, signup)
+  if (!user) {
+    return (
+      <Router>
+        <Route path="/login" component={Login} />
+        <Route path="/signup/:token" component={SignupWithToken} />
+        <Route default component={Login} />
+      </Router>
+    );
+  }
+
+  // Protected dashboard routes
   return (
     <div class="flex h-screen bg-black text-gray-100">
       <Sidebar />
@@ -31,10 +63,19 @@ export function App() {
               <Route path="/daos" component={DAOs} />
               <Route path="/daos/:slug" component={DAODetailWithKey} />
               <Route path="/analytics" component={Analytics} />
+              <Route path="/invites" component={Invites} />
             </Router>
           </div>
         </main>
       </div>
     </div>
+  );
+}
+
+export function App() {
+  return (
+    <AuthProvider>
+      <ProtectedRoutes />
+    </AuthProvider>
   );
 }

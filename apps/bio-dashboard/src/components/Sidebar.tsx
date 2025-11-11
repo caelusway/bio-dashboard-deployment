@@ -1,10 +1,15 @@
 import { Link } from 'preact-router/match';
 import { useState } from 'preact/hooks';
 import { PlatformIcon } from './PlatformIcon';
+import { useAuth } from '../lib/auth';
 
 const mainNavigation = [
   { name: 'Overview', href: '/', platform: 'overview' },
   { name: 'DAO Analytics', href: '/daos', platform: 'daos' },
+];
+
+const adminNavigation = [
+  { name: 'Invites', href: '/invites', platform: 'admin' },
 ];
 
 const platforms = [
@@ -20,6 +25,7 @@ const platforms = [
 ];
 
 export function Sidebar() {
+  const { user } = useAuth();
   const [platformsOpen, setPlatformsOpen] = useState(true);
 
   return (
@@ -50,6 +56,24 @@ export function Sidebar() {
               <span class="font-medium">{item.name}</span>
             </Link>
           ))}
+
+          {/* Admin Navigation (only for admins) */}
+          {user?.role === 'admin' && (
+            <>
+              <div class="my-4 border-t border-gray-800"></div>
+              {adminNavigation.map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  activeClassName="bg-gradient-to-r from-purple-600/20 to-purple-600/10 text-white border-l-2 border-purple-500"
+                  class="flex items-center gap-3 px-4 py-3 text-sm text-gray-400 rounded-lg hover:bg-gray-900 hover:text-white transition-all border-l-2 border-transparent"
+                >
+                  <PlatformIcon platform={item.platform} size="md" />
+                  <span class="font-medium">{item.name}</span>
+                </Link>
+              ))}
+            </>
+          )}
 
           {/* Platforms Menu Item */}
           <div>
