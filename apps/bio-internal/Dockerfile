@@ -1,22 +1,14 @@
 # Backend API Dockerfile
-FROM oven/bun:1.2-alpine AS deps
-
-WORKDIR /app
-
-# Install dependencies using Bun
-COPY package.json bun.lock ./
-RUN bun install --frozen-lockfile --production
-
-# Production image with Bun for runtime
-FROM oven/bun:1.2-alpine AS runner
+FROM oven/bun:1.2-alpine
 
 WORKDIR /app
 
 ENV NODE_ENV=production
 ENV PORT=4100
 
-# Copy node_modules from deps stage
-COPY --from=deps /app/node_modules ./node_modules
+# Copy package files and install dependencies
+COPY package.json bun.lock ./
+RUN bun install --frozen-lockfile --production
 
 # Copy application code
 COPY . .
