@@ -159,12 +159,11 @@ module.exports = {
     {
       name: 'bio-frontend',
       cwd: './apps/bio-dashboard',
-      script: 'bun',
-      args: 'run server.ts',
+      script: 'bunx',
+      args: 'serve dist -p 3000 -s',
       interpreter: 'none',
       env: {
-        NODE_ENV: 'production',
-        PORT: 3000
+        NODE_ENV: 'production'
       },
       instances: 1,
       autorestart: true,
