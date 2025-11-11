@@ -29,7 +29,7 @@ if (existsSync(dashboardPath)) {
   console.log(`❌ Dashboard build not found! Make sure deploy.sh ran successfully.`);
 }
 
-export const app = new Elysia()
+const app = new Elysia()
   // Enable CORS for dashboard
   .use(cors({
     origin: isDev
@@ -65,57 +65,45 @@ export const app = new Elysia()
 if (!isDev && existsSync(dashboardPath)) {
   console.log('📂 Serving static dashboard files from:', dashboardPath);
 
-  // Serve static files - this wildcard route is added AFTER all API routes
-  // We need to explicitly skip API paths to prevent interference
-  app.get('*', async ({ path, set, request }) => {
+  // Serve static files with a guard function
+  const serveStatic = ({ path, set, request }: any) => {
     console.log('[Static] Request for:', path);
 
-    // Check if this is an API request - if so, return undefined to let API handlers process it
-    // This is critical because the wildcard can interfere with API routes
+    // Check if this is an API request by examining Accept header
+    const acceptHeader = request.headers.get('accept') || '';
+    const wantsJson = acceptHeader.includes('application/json');
+
+    // API paths that might conflict with frontend routes
     const isApiPath = path.startsWith('/api') ||
                       path.startsWith('/v1') ||
                       path.startsWith('/health') ||
                       path.startsWith('/daos') ||
                       path.startsWith('/api-docs');
 
-    if (isApiPath) {
-      // Check Accept header to determine if it's an API call vs browser navigation
-      const acceptHeader = request.headers.get('accept') || '';
-      const wantsJson = acceptHeader.includes('application/json');
-
-      console.log('[Static] API path detected:', path, 'wantsJson:', wantsJson);
-
-      // If client wants JSON, this is an API request - skip static file handler
-      if (wantsJson) {
-        console.log('[Static] Skipping - API request');
-        return; // Let API handlers deal with it
-      }
-
-      // Otherwise, it's a browser navigation to a frontend route (e.g., /daos page)
-      // Fall through to serve index.html
+    if (isApiPath && wantsJson) {
+      console.log('[Static] API request - skipping static handler');
+      return; // Let API handlers process it
     }
 
     try {
-      // First, try to serve static files (JS, CSS, images, etc.)
+      // Serve static files (JS, CSS, images) - these have file extensions
       if (path !== '/' && path.includes('.')) {
         const filePath = join(dashboardPath, path);
-        console.log('[Static] Checking file:', filePath);
-
         if (existsSync(filePath)) {
           console.log('[Static] Serving file:', filePath);
           return Bun.file(filePath);
         }
       }
 
-      // For all other paths (including root), serve index.html for SPA routing
+      // For all other paths, serve index.html (SPA routing)
       const indexPath = join(dashboardPath, 'index.html');
-      console.log('[Static] Serving index.html for SPA route:', path);
+      console.log('[Static] Serving index.html for:', path);
 
       if (existsSync(indexPath)) {
         return Bun.file(indexPath);
       }
 
-      console.error('[Static] index.html not found at:', indexPath);
+      console.error('[Static] index.html not found');
       set.status = 404;
       return { error: 'Dashboard not found' };
     } catch (e) {
@@ -123,9 +111,13 @@ if (!isDev && existsSync(dashboardPath)) {
       set.status = 500;
       return { error: 'Internal server error', details: String(e) };
     }
-  });
+  };
+
+  // Register wildcard route for ALL GET requests
+  app.get('*', serveStatic);
 } else if (!isDev) {
   console.warn('⚠️  Warning: Dashboard build not found. Please run: cd apps/bio-dashboard && bun run build');
 }
 
+export { app };
 export type App = typeof app;
