@@ -65,7 +65,11 @@ const app = new Elysia()
   .use(growthRoutes)
   .use(daoRoutes);
 
-if (!isDev && hasDashboardBuild) {
+// Only serve static frontend if explicitly enabled (for monolithic deployment)
+const serveFrontend = process.env.SERVE_FRONTEND === 'true';
+
+if (!isDev && serveFrontend && hasDashboardBuild) {
+  console.log('📦 Serving frontend from backend (monolithic mode)');
   app.use(await staticPlugin({
     assets: dashboardDistPath,
     prefix: '/',
@@ -90,8 +94,8 @@ if (!isDev && hasDashboardBuild) {
 
     return new Response('Internal Server Error', { status: 500 });
   });
-} else if (!isDev) {
-  console.warn('⚠️ Dashboard build not found. SPA routes will return 404.');
+} else {
+  console.log('🔌 API-only mode (frontend served separately)');
 }
 
 console.log('✅ API server configured - ready to handle requests');
