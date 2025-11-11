@@ -28,21 +28,9 @@ const shouldServeDashboard = (pathname: string) => {
 };
 
 const app = new Elysia()
-  // Enable CORS for frontend
+  // Enable CORS for frontend - allow all origins
   .use(cors({
-    origin: isDev
-      ? ['http://localhost:3000', 'http://localhost:3001', 'http://localhost:5173']
-      : (request) => {
-          const origin = request.headers.get('origin');
-          if (!origin) return false;
-          // Allow Coolify domains (sslip.io), Railway domains, ngrok domains, and bio-dashboard domains
-          return origin.includes('.sslip.io') ||
-                 origin.includes('.railway.app') ||
-                 origin.includes('.ngrok-free.app') ||
-                 origin.includes('.ngrok.app') ||
-                 origin.includes('bio-dashboard') ||
-                 origin.includes('localhost');
-        },
+    origin: true,
     credentials: true,
   }))
   .use(
