@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'preact/hooks';
+import { useEffect, useState } from 'preact/hooks';
 import { api, GrowthSourceSummary, GrowthSnapshot } from '../lib/api';
 import { MetricCard } from '../components/MetricCard';
 import { ChartCard } from '../components/ChartCard';
@@ -40,20 +40,9 @@ interface DAOWeeklyStats {
   sparklineData: Array<{ date: string; totalFollowers: number }>;
 }
 
-interface DAOEngagementData {
-  daoId: string;
-  daoName: string;
-  daoSlug: string;
-  totalLikes: string;
-  totalRetweets: string;
-  totalReplies: string;
-  totalEngagement: string;
-}
-
 export function Overview() {
   const [sources, setSources] = useState<GrowthSourceSummary[]>([]);
   const [daoStats, setDaoStats] = useState<DAOWeeklyStats | null>(null);
-  const [engagementData, setEngagementData] = useState<DAOEngagementData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [window, setWindow] = useState<'day' | 'week' | 'month'>('month');
@@ -63,144 +52,9 @@ export function Overview() {
   const [chartView, setChartView] = useState<'absolute' | 'normalized' | 'growth'>('absolute');
   const [selectedPlatforms, setSelectedPlatforms] = useState<Set<string>>(new Set(['Twitter Followers', 'Discord Members', 'Telegram Members', 'YouTube Subscribers', 'LinkedIn Followers']));
 
-  const engagementChartRef = useRef<Chart | null>(null);
-
   useEffect(() => {
     loadData();
   }, [window]);
-
-  useEffect(() => {
-    loadEngagementData();
-  }, []);
-
-  // Render chart when data changes using direct DOM manipulation
-  useEffect(() => {
-    if (!engagementData || engagementData.length === 0) {
-      return;
-    }
-
-    // Use setTimeout to ensure DOM is fully rendered
-    const timeoutId = setTimeout(() => {
-      const canvas = document.querySelector<HTMLCanvasElement>('#engagementChart');
-
-      if (!canvas) {
-        console.error('[Overview] Canvas not found');
-        return;
-      }
-
-      // Destroy existing chart
-      if (engagementChartRef.current) {
-        engagementChartRef.current.destroy();
-        engagementChartRef.current = null;
-      }
-
-      const ctx = canvas.getContext('2d');
-      if (!ctx) {
-        console.error('[Overview] Failed to get canvas context');
-        return;
-      }
-
-      // Prepare data
-      const labels = engagementData.map(dao => dao.daoName);
-      const likes = engagementData.map(dao => parseInt(dao.totalLikes));
-      const retweets = engagementData.map(dao => parseInt(dao.totalRetweets));
-      const replies = engagementData.map(dao => parseInt(dao.totalReplies));
-
-      engagementChartRef.current = new Chart(ctx, {
-        type: 'bar',
-        data: {
-          labels,
-          datasets: [
-            {
-              label: 'Likes',
-              data: likes,
-              backgroundColor: 'rgba(59, 130, 246, 0.8)',
-              borderColor: 'rgb(59, 130, 246)',
-              borderWidth: 1,
-            },
-            {
-              label: 'Retweets',
-              data: retweets,
-              backgroundColor: 'rgba(34, 197, 94, 0.8)',
-              borderColor: 'rgb(34, 197, 94)',
-              borderWidth: 1,
-            },
-            {
-              label: 'Replies',
-              data: replies,
-              backgroundColor: 'rgba(168, 85, 247, 0.8)',
-              borderColor: 'rgb(168, 85, 247)',
-              borderWidth: 1,
-            },
-          ],
-        },
-        options: {
-          indexAxis: 'y',
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: {
-              display: true,
-              position: 'top',
-              labels: {
-                color: 'rgb(156, 163, 175)',
-                padding: 15,
-                font: {
-                  size: 12,
-                },
-              },
-            },
-            tooltip: {
-              backgroundColor: 'rgba(17, 24, 39, 0.95)',
-              titleColor: 'rgb(243, 244, 246)',
-              bodyColor: 'rgb(209, 213, 219)',
-              borderColor: 'rgb(55, 65, 81)',
-              borderWidth: 1,
-              padding: 12,
-              displayColors: true,
-              callbacks: {
-                label: (context) => {
-                  const label = context.dataset.label || '';
-                  const value = context.parsed.x;
-                  return `${label}: ${formatNumber(value as number)}`;
-                },
-              },
-            },
-          },
-          scales: {
-            x: {
-              stacked: true,
-              beginAtZero: true,
-              ticks: {
-                color: 'rgb(156, 163, 175)',
-                callback: (value) => formatNumber(value as number),
-              },
-              grid: {
-                color: 'rgba(55, 65, 81, 0.5)',
-              },
-            },
-            y: {
-              stacked: true,
-              ticks: {
-                color: 'rgb(156, 163, 175)',
-              },
-              grid: {
-                color: 'rgba(55, 65, 81, 0.5)',
-              },
-            },
-          },
-        },
-      });
-    }, 100);
-
-    return () => {
-      clearTimeout(timeoutId);
-      if (engagementChartRef.current) {
-        engagementChartRef.current.destroy();
-        engagementChartRef.current = null;
-      }
-    };
-  }, [engagementData]);
 
   useEffect(() => {
     if (sources.length > 0) {
@@ -243,21 +97,6 @@ export function Overview() {
       console.error('Error loading trend data:', err);
     } finally {
       setLoadingTrends(false);
-    }
-  };
-
-  const loadEngagementData = async () => {
-    try {
-      console.log('[Overview] Loading engagement data...');
-      const response = await fetch('http://localhost:4100/daos/stats/engagement-breakdown');
-      const data = await response.json();
-
-      console.log('[Overview] Engagement data loaded:', data.success, data.data?.length);
-      if (data.success) {
-        setEngagementData(data.data);
-      }
-    } catch (err) {
-      console.error('[Overview] Error loading engagement data:', err);
     }
   };
 
@@ -626,28 +465,6 @@ export function Overview() {
           </div>
         </>
       )}
-
-      {/* Engagement Breakdown Chart */}
-      <div class="border-t border-gray-800 pt-4">
-        <div class="mb-4">
-          <h3 class="text-sm font-bold text-white uppercase tracking-wide">Engagement Breakdown</h3>
-          <p class="text-xs text-gray-400 mt-1">Top 10 DAOs by total engagement (likes + retweets + replies)</p>
-        </div>
-      </div>
-
-      <div class="bg-gradient-to-br from-gray-900 to-black rounded-xl border border-gray-800 shadow-lg p-6">
-        <div class="h-96 relative">
-          <canvas
-            id="engagementChart"
-            ref={canvasRef}
-          ></canvas>
-          {(!engagementData || engagementData.length === 0) && (
-            <div class="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-gray-900 to-black">
-              <p class="text-gray-500">Loading engagement data...</p>
-            </div>
-          )}
-        </div>
-      </div>
 
       <div class="border-t border-gray-800 pt-4">
         <h3 class="text-sm font-bold text-white uppercase tracking-wide mb-4">Platform Metrics</h3>

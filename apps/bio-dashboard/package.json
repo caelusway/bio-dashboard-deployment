@@ -15,7 +15,8 @@
     "chart.js": "^4.4.1",
     "date-fns": "^4.1.0",
     "preact": "^10.24.3",
-    "preact-router": "^4.1.2"
+    "preact-router": "^4.1.2",
+    "recharts": "^3.4.1"
   },
   "devDependencies": {
     "@preact/preset-vite": "^2.9.2",

@@ -648,36 +648,51 @@ export const daoRoutes = new Elysia({ prefix: '/daos' })
 
   // Get engagement breakdown data (top 10 DAOs by total engagement)
   .get('/stats/engagement-breakdown', async () => {
-    // Get engagement metrics from twitter_posts grouped by DAO
-    const engagementData = await db
-      .select({
-        daoId: twitterPosts.daoId,
-        daoName: daoEntities.name,
-        daoSlug: daoEntities.slug,
-        totalLikes: sql<number>`COALESCE(SUM(CAST((twitter_posts.tweet_metrics->>'like_count') AS INTEGER)), 0)`.as('total_likes'),
-        totalRetweets: sql<number>`COALESCE(SUM(CAST((twitter_posts.tweet_metrics->>'retweet_count') AS INTEGER)), 0)`.as('total_retweets'),
-        totalReplies: sql<number>`COALESCE(SUM(CAST((twitter_posts.tweet_metrics->>'reply_count') AS INTEGER)), 0)`.as('total_replies'),
-        totalEngagement: sql<number>`COALESCE(
-          SUM(CAST((twitter_posts.tweet_metrics->>'like_count') AS INTEGER)) +
-          SUM(CAST((twitter_posts.tweet_metrics->>'retweet_count') AS INTEGER)) +
-          SUM(CAST((twitter_posts.tweet_metrics->>'reply_count') AS INTEGER)),
-          0
-        )`.as('total_engagement'),
-      })
-      .from(twitterPosts)
-      .innerJoin(daoEntities, eq(twitterPosts.daoId, daoEntities.id))
-      .groupBy(twitterPosts.daoId, daoEntities.name, daoEntities.slug)
-      .orderBy(desc(sql<number>`COALESCE(
-          SUM(CAST((twitter_posts.tweet_metrics->>'like_count') AS INTEGER)) +
-          SUM(CAST((twitter_posts.tweet_metrics->>'retweet_count') AS INTEGER)) +
-          SUM(CAST((twitter_posts.tweet_metrics->>'reply_count') AS INTEGER)),
-          0
-        )`))
-      .limit(10);
+    // Use raw SQL for better performance with JSONB operations
+    const result = await db.execute<{
+      daoName: string;
+      daoSlug: string;
+      totalLikes: string;
+      totalRetweets: string;
+      totalReplies: string;
+      totalEngagement: string;
+    }>(sql`
+      WITH engagement_metrics AS (
+        SELECT
+          dao_id,
+          COALESCE((tweet_metrics->>'like_count')::integer, 0) as likes,
+          COALESCE((tweet_metrics->>'retweet_count')::integer, 0) as retweets,
+          COALESCE((tweet_metrics->>'reply_count')::integer, 0) as replies
+        FROM twitter_posts
+        WHERE tweet_metrics IS NOT NULL
+      ),
+      dao_engagement AS (
+        SELECT
+          em.dao_id,
+          SUM(em.likes) as total_likes,
+          SUM(em.retweets) as total_retweets,
+          SUM(em.replies) as total_replies,
+          SUM(em.likes + em.retweets + em.replies) as total_engagement
+        FROM engagement_metrics em
+        GROUP BY em.dao_id
+        ORDER BY total_engagement DESC
+        LIMIT 10
+      )
+      SELECT
+        de.name as "daoName",
+        de.slug as "daoSlug",
+        COALESCE(dag.total_likes, 0)::text as "totalLikes",
+        COALESCE(dag.total_retweets, 0)::text as "totalRetweets",
+        COALESCE(dag.total_replies, 0)::text as "totalReplies",
+        COALESCE(dag.total_engagement, 0)::text as "totalEngagement"
+      FROM dao_engagement dag
+      INNER JOIN dao_entities de ON de.id = dag.dao_id
+      ORDER BY dag.total_engagement DESC
+    `);
 
     return {
       success: true,
-      data: engagementData,
+      data: result,
     };
   })
 
