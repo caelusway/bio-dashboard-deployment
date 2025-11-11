@@ -1,15 +1,17 @@
 # Backend API Dockerfile
-FROM oven/bun:1.2-alpine AS base
+FROM node:20-alpine AS deps
 
 WORKDIR /app
 
 # Install dependencies
-FROM base AS deps
 COPY package*.json ./
-RUN bun install --production
+RUN npm ci --omit=dev --legacy-peer-deps
 
-# Production image - use Bun for runtime
-FROM base AS runner
+# Production image with Bun for runtime
+FROM oven/bun:1.2-alpine AS runner
+
+WORKDIR /app
+
 ENV NODE_ENV=production
 ENV PORT=4100
 
