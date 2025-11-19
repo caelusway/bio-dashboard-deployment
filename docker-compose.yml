@@ -6,12 +6,13 @@ services:
       context: ./apps/bio-dashboard
       dockerfile: Dockerfile
       args:
-        - VITE_API_URL=${VITE_API_URL:-http://localhost:4100}
+        - VITE_API_URL=${VITE_API_URL:-}
     ports:
       - "${FRONTEND_PORT:-3000}:3000"
     environment:
       - NODE_ENV=development
-      - VITE_API_URL=${VITE_API_URL:-http://localhost:4100}
+      - VITE_API_URL=${VITE_API_URL:-}
+      - BACKEND_URL=http://backend:4100
     # volumes:
     #   - ./apps/bio-dashboard:/app
     #   - /app/node_modules

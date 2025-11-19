@@ -1,8 +1,24 @@
 Bun.serve({
     port: 3000,
     hostname: "0.0.0.0",
-    fetch(req) {
+    async fetch(req) {
         const url = new URL(req.url);
+
+        // Proxy /api requests to backend
+        // This solves Mixed Content issues (HTTPS frontend -> HTTP backend)
+        // and CORS issues by making requests same-origin
+        if (url.pathname.startsWith("/api")) {
+            const backendUrl = process.env.BACKEND_URL || "http://backend:4100";
+            const targetUrl = new URL(url.pathname + url.search, backendUrl);
+            
+            // Forward the request to the backend
+            // We don't copy Host header to avoid Host mismatch errors
+            return fetch(targetUrl, {
+                method: req.method,
+                headers: req.headers,
+                body: req.body,
+            });
+        }
 
         // Health check endpoint
         if (url.pathname === "/health") {
