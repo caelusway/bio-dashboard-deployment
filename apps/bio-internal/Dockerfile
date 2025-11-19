@@ -9,6 +9,10 @@ RUN bun install --frozen-lockfile --production
 
 # Production
 FROM base AS release
+
+# Install curl for healthcheck
+RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
+
 COPY --from=install /app/node_modules ./node_modules
 COPY . .
 
