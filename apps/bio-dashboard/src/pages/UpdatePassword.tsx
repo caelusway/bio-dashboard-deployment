@@ -8,12 +8,14 @@ export function UpdatePassword() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [isRecovery, setIsRecovery] = useState(false);
+  const [userEmail, setUserEmail] = useState('');
 
   useEffect(() => {
     // Check if this is a password recovery/invite session
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(({ data: { session } }: { data:  any }) => {
       if (session) {
         setIsRecovery(true);
+        setUserEmail(session.user.email || '');
       } else {
         // No session, redirect to login
         route('/login');
@@ -71,6 +73,9 @@ export function UpdatePassword() {
           <div class="text-center mb-8">
             <h1 class="text-3xl font-bold text-white mb-2">Set Your Password</h1>
             <p class="text-gray-400">Create a secure password for your account</p>
+            {userEmail && (
+              <p class="text-sm text-gray-500 mt-2">Account: {userEmail}</p>
+            )}
           </div>
 
           <form onSubmit={handleSubmit} class="space-y-6">
