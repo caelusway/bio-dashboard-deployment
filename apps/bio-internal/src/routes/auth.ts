@@ -3,6 +3,7 @@ import { db } from '../db/client';
 import { invites, users } from '../db/schema';
 import { supabase } from '../lib/supabase';
 import { eq, and } from 'drizzle-orm';
+import { auth } from '../middleware/auth';
 
 const ADMIN_EMAIL = 'emre@bio.xyz';
 
@@ -88,13 +89,17 @@ export const authRoutes = new Elysia({ prefix: '/auth' })
         return { error: 'Invite has expired' };
       }
 
-      // Create Supabase auth user
+      // Determine role: admin for emre@bio.xyz, member for others
+      const role = email === ADMIN_EMAIL ? 'admin' : 'member';
+
+      // Create Supabase auth user with role in metadata
       const { data: authData, error: authError } = await supabase.auth.admin.createUser({
         email,
         password,
         email_confirm: true, // Auto-confirm email for invited users
         user_metadata: {
           full_name: fullName,
+          role, // Store role in metadata
         },
       });
 
@@ -103,18 +108,6 @@ export const authRoutes = new Elysia({ prefix: '/auth' })
         set.status = 400;
         return { error: authError?.message || 'Failed to create account' };
       }
-
-      // Determine role: admin for emre@bio.xyz, member for others
-      const role = email === ADMIN_EMAIL ? 'admin' : 'member';
-
-      // Create user in our database
-      await db.insert(users).values({
-        id: authData.user.id,
-        email,
-        role,
-        fullName: fullName || null,
-        lastLoginAt: new Date(),
-      });
 
       // Mark invite as accepted
       await db
@@ -208,4 +201,12 @@ export const authRoutes = new Elysia({ prefix: '/auth' })
     }
 
     return { message: 'Logged out successfully' };
+  });
+
+// Protected auth routes
+export const protectedAuthRoutes = new Elysia({ prefix: '/auth' })
+  .use(auth())
+  .get('/me', async ({ user }) => {
+    console.log('GET /auth/me - user:', user);
+    return { user };
   });

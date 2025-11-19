@@ -23,13 +23,18 @@ const extractToken = (authorization: string | null): string | null => {
 export const auth = () =>
   new Elysia({ name: 'auth' })
     .derive(async ({ request, set }) => {
+      console.log('[auth middleware] Starting...');
       const authorization = request.headers.get('authorization');
+      console.log('[auth middleware] Authorization header:', authorization ? 'present' : 'missing');
       const token = extractToken(authorization);
 
       if (!token) {
+        console.log('[auth middleware] No token found');
         set.status = 401;
         throw new Error('No authorization token provided');
       }
+
+      console.log('[auth middleware] Token extracted:', token.substring(0, 20) + '...');
 
       // Verify JWT with Supabase
       const {
@@ -38,29 +43,24 @@ export const auth = () =>
       } = await supabase.auth.getUser(token);
 
       if (error || !supabaseUser) {
+        console.log('[auth middleware] Supabase auth failed:', error?.message);
         set.status = 401;
         throw new Error('Invalid or expired token');
       }
 
-      // Get user details from our database
-      const [dbUser] = await db
-        .select()
-        .from(users)
-        .where(eq(users.id, supabaseUser.id))
-        .limit(1);
+      console.log('[auth middleware] Supabase user verified:', supabaseUser.email);
 
-      if (!dbUser) {
-        set.status = 401;
-        throw new Error('User not found in database');
-      }
+      // Get role from user_metadata (no database needed!)
+      const role = (supabaseUser.user_metadata?.role || (supabaseUser.email === 'emre@bio.xyz' ? 'admin' : 'member')) as 'admin' | 'member';
 
       const user: AuthUser = {
-        id: dbUser.id,
-        email: dbUser.email,
-        role: dbUser.role,
-        fullName: dbUser.fullName,
+        id: supabaseUser.id,
+        email: supabaseUser.email || '',
+        role,
+        fullName: supabaseUser.user_metadata?.full_name,
       };
 
+      console.log('[auth middleware] Returning user:', user);
       return { user };
     });
 

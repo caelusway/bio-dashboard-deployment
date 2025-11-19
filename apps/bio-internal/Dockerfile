@@ -1,24 +1,24 @@
-# Backend API Dockerfile
-FROM oven/bun:1.2-alpine
-
+# Backend API Dockerfile (Bun + Elysia)
+FROM oven/bun:1 AS base
 WORKDIR /app
+
+# Install dependencies
+FROM base AS install
+COPY package.json bun.lock* ./
+RUN bun install --frozen-lockfile --production
+
+# Production
+FROM base AS release
+COPY --from=install /app/node_modules ./node_modules
+COPY . .
+
+EXPOSE 4100
 
 ENV NODE_ENV=production
 ENV PORT=4100
 
-# Copy package files and install dependencies
-COPY package.json bun.lock ./
-RUN bun install --frozen-lockfile --production
-
-# Copy application code
-COPY . .
-
-# Expose port
-EXPOSE 4100
-
 # Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
-  CMD wget --spider -q http://localhost:4100/health || exit 1
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+  CMD curl -f http://localhost:4100/health || exit 1
 
-# Start the application
 CMD ["bun", "run", "src/index.ts"]

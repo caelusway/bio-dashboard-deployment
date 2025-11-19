@@ -17,7 +17,10 @@
     "twitter:backfill-followers": "bun run scripts/backfill-followers.ts",
     "growth:backfill": "bun run scripts/backfill-growth.ts",
     "twitter:backfill-follower-history": "bun run scripts/backfill-follower-history.ts",
-    "drizzle:migrate": "bun run scripts/run-migrations.ts"
+    "drizzle:migrate": "bun run scripts/run-migrations.ts",
+    "sync:followers": "bun run src/jobs/followerSync.ts",
+    "sync:engagement": "bun run src/jobs/engagementSync.ts",
+    "sync:full": "bun run src/jobs/followerSync.ts && bun run src/jobs/engagementSync.ts"
   },
   "dependencies": {
     "@elysiajs/cors": "^1.4.0",

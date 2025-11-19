@@ -1,4 +1,3 @@
-import 'dotenv/config';
 import postgres from 'postgres';
 import { drizzle } from 'drizzle-orm/postgres-js';
 import { daoEntities, daoFollowerSnapshots } from '../src/db/schema';

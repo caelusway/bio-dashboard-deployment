@@ -80,48 +80,41 @@ export function AuthProvider({ children }: { children: preact.ComponentChildren 
   }, []);
 
   const loadUserDetails = async (supabaseUser: User) => {
-    try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/auth/me`, {
-        headers: {
-          Authorization: `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`,
-        },
-      });
+    // Just use Supabase user metadata directly - no backend call needed
+    const user: AuthUser = {
+      id: supabaseUser.id,
+      email: supabaseUser.email || '',
+      role: (supabaseUser.user_metadata?.role || (supabaseUser.email === 'emre@bio.xyz' ? 'admin' : 'member')) as 'admin' | 'member',
+      fullName: supabaseUser.user_metadata?.full_name,
+    };
 
-      if (response.ok) {
-        const data = await response.json();
-        setUser(data.user);
-      } else {
-        // Fallback to basic user info
-        setUser({
-          id: supabaseUser.id,
-          email: supabaseUser.email || '',
-          role: supabaseUser.email === 'emre@bio.xyz' ? 'admin' : 'member',
-          fullName: supabaseUser.user_metadata?.full_name,
-        });
-      }
-    } catch (error) {
-      console.error('Failed to load user details:', error);
-      setUser({
-        id: supabaseUser.id,
-        email: supabaseUser.email || '',
-        role: supabaseUser.email === 'emre@bio.xyz' ? 'admin' : 'member',
-        fullName: supabaseUser.user_metadata?.full_name,
-      });
-    } finally {
-      setLoading(false);
-    }
+    console.log('Setting user from Supabase:', user);
+    setUser(user);
+    setLoading(false);
   };
 
   const signIn = async (email: string, password: string) => {
+    if (!supabase) {
+      throw new Error('Supabase is not configured');
+    }
+
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
 
-    if (error) throw error;
-    if (data.user) {
-      await loadUserDetails(data.user);
+    if (error) {
+      console.error('Supabase signIn error:', error);
+      throw error;
     }
+
+    if (!data.user) {
+      throw new Error('No user data returned');
+    }
+
+    console.log('Login successful, loading user details...');
+    await loadUserDetails(data.user);
+    console.log('User details loaded:', data.user.email);
   };
 
   const signUp = async (email: string, password: string, fullName: string, inviteToken: string) => {

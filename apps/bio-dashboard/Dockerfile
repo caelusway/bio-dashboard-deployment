@@ -16,26 +16,7 @@ FROM oven/bun:1.2-alpine
 
 WORKDIR /app
 COPY --from=build /app/dist ./dist
-
-# Simple static file server with Bun
-COPY <<EOF ./server.ts
-Bun.serve({
-  port: 3000,
-  hostname: "0.0.0.0",
-  fetch(req) {
-    const url = new URL(req.url);
-    if (url.pathname === "/health") {
-      return new Response("healthy", { status: 200 });
-    }
-    const filePath = url.pathname === "/" ? "/index.html" : url.pathname;
-    const file = Bun.file(\`./dist\${filePath}\`);
-    return file.exists().then(exists =>
-      exists ? new Response(file) : new Response(Bun.file("./dist/index.html"))
-    );
-  }
-});
-console.log("Frontend server running on http://0.0.0.0:3000");
-EOF
+COPY server.ts ./server.ts
 
 EXPOSE 3000
 CMD ["bun", "run", "server.ts"]

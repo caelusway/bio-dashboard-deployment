@@ -1,9 +1,10 @@
 import { Elysia, t } from 'elysia';
 import { db } from '../db/client';
-import { invites, users } from '../db/schema';
+import { invites } from '../db/schema';
 import { adminOnly } from '../middleware/auth';
-import { eq, and } from 'drizzle-orm';
+import { eq, and, desc } from 'drizzle-orm';
 import { randomBytes } from 'crypto';
+import { supabase } from '../lib/supabase';
 
 const ADMIN_EMAIL = 'emre@bio.xyz';
 
@@ -31,12 +32,13 @@ export const inviteRoutes = new Elysia({ prefix: '/invites' })
         email: invites.email,
         invitedBy: invites.invitedBy,
         status: invites.status,
+        inviteToken: invites.inviteToken,
         expiresAt: invites.expiresAt,
         acceptedAt: invites.acceptedAt,
         createdAt: invites.createdAt,
       })
       .from(invites)
-      .orderBy(invites.createdAt);
+      .orderBy(desc(invites.createdAt));
 
     return { invites: allInvites };
   })
@@ -44,8 +46,11 @@ export const inviteRoutes = new Elysia({ prefix: '/invites' })
   // Create new invite (admin only)
   .post(
     '/',
-    async ({ body, user, set }) => {
+    async (context) => {
+      const { body, user, set } = context;
       const { email } = body;
+
+      console.log('[invites POST] User from context:', user);
 
       // Check if email already invited
       const [existing] = await db
@@ -59,14 +64,10 @@ export const inviteRoutes = new Elysia({ prefix: '/invites' })
         return { error: 'Email already has a pending invite' };
       }
 
-      // Check if user already exists
-      const [existingUser] = await db
-        .select()
-        .from(users)
-        .where(eq(users.email, email))
-        .limit(1);
+      // Check if user already exists in Supabase Auth
+      const { data: { users: existingUsers }, error: listError } = await supabase.auth.admin.listUsers();
 
-      if (existingUser) {
+      if (!listError && existingUsers?.some(u => u.email === email)) {
         set.status = 400;
         return { error: 'User already exists' };
       }
@@ -76,7 +77,7 @@ export const inviteRoutes = new Elysia({ prefix: '/invites' })
         .insert(invites)
         .values({
           email,
-          invitedBy: user.email,
+          invitedBy: user?.email || ADMIN_EMAIL,
           inviteToken: generateInviteToken(),
           expiresAt: getExpiryDate(),
           status: 'pending',

@@ -1,4 +1,3 @@
-import 'dotenv/config';
 import postgres from 'postgres';
 import { drizzle } from 'drizzle-orm/postgres-js';
 import { createClient } from '@supabase/supabase-js';
@@ -36,8 +35,8 @@ const legacySupabase = createClient(
 const legacyDbUrl = process.env['LEGACY_SUPABASE_DB_URL'];
 const legacyPg = legacyDbUrl
   ? postgres(legacyDbUrl, {
-      ssl: { rejectUnauthorized: false },
-    })
+    ssl: { rejectUnauthorized: false },
+  })
   : null;
 
 type LegacyTweet = {
@@ -224,16 +223,16 @@ async function main() {
       .map((row) => row.table_name.replace(/^account_/, '').replace(/_tweets$/, ''))
       .filter(Boolean);
   } else {
-  const { data, error } = await legacySupabase
-    .from<AccountRow>('accounts')
-    .select('slug,name,twitter_handle');
+    const { data, error } = await legacySupabase
+      .from<AccountRow>('accounts')
+      .select('slug,name,twitter_handle');
 
-  if (error) {
-    throw new Error(`Failed to list accounts: ${error.message}`);
-  }
+    if (error) {
+      throw new Error(`Failed to list accounts: ${error.message}`);
+    }
 
-  accounts = data ?? [];
-  daoNameList = accounts.map((acc) => acc.slug).filter(Boolean);
+    accounts = data ?? [];
+    daoNameList = accounts.map((acc) => acc.slug).filter(Boolean);
   }
 
   if (!accounts.length) {

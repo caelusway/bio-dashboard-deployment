@@ -1,45 +1,42 @@
 version: '3.8'
 
 services:
-  backend:
-    build:
-      context: ./apps/bio-internal
-      dockerfile: Dockerfile
-    environment:
-      NODE_ENV: production
-      PORT: 4100
-      SUPABASE_URL: ${SUPABASE_URL}
-      SUPABASE_DB_URL: ${SUPABASE_DB_URL}
-      SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY}
-      SUPABASE_JWT_SECRET: ${SUPABASE_JWT_SECRET}
-      TWITTER_BEARER_TOKEN: ${TWITTER_BEARER_TOKEN}
-      LOG_LEVEL: ${LOG_LEVEL:-info}
-    ports:
-      - "4100"
-    labels:
-      - "coolify.managed=true"
-      - "coolify.name=backend"
-      - "coolify.port=4100"
-    restart: unless-stopped
-    networks:
-      - app-network
-
   frontend:
     build:
       context: ./apps/bio-dashboard
       dockerfile: Dockerfile
       args:
-        VITE_API_URL: ${VITE_API_URL:-http://backend:4100}
+        - VITE_API_URL=${VITE_API_URL:-http://localhost:4100}
     ports:
-      - "3000"
-    labels:
-      - "coolify.managed=true"
-      - "coolify.name=frontend"
-      - "coolify.port=3000"
-    restart: unless-stopped
+      - "${FRONTEND_PORT:-3000}:3000"
+    environment:
+      - NODE_ENV=development
+      - VITE_API_URL=${VITE_API_URL:-http://localhost:4100}
+    # volumes:
+    #   - ./apps/bio-dashboard:/app
+    #   - /app/node_modules
+    depends_on:
+      - backend
     networks:
-      - app-network
+      - bio-network
+
+  backend:
+    build:
+      context: ./apps/bio-internal
+      dockerfile: Dockerfile
+    ports:
+      - "${BACKEND_PORT:-4100}:4100"
+    env_file:
+      - ./apps/bio-internal/.env
+    environment:
+      - NODE_ENV=development
+      - PORT=4100
+    # volumes:
+    #   - ./apps/bio-internal:/app
+    #   - /app/node_modules
+    networks:
+      - bio-network
 
 networks:
-  app-network:
+  bio-network:
     driver: bridge

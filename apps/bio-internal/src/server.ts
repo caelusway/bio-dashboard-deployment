@@ -8,7 +8,7 @@ import { healthRoutes } from './routes/health';
 import { twitterRoutes } from './routes/twitter';
 import { growthRoutes } from './routes/growth';
 import { daoRoutes } from './routes/daos';
-import { authRoutes } from './routes/auth';
+import { authRoutes, protectedAuthRoutes } from './routes/auth';
 import { inviteRoutes } from './routes/invites';
 
 const isDev = process.env.NODE_ENV !== 'production';
@@ -30,10 +30,16 @@ const shouldServeDashboard = (pathname: string) => {
 };
 
 const app = new Elysia()
-  // Enable CORS for frontend - allow all origins
+  // Enable CORS for frontend
   .use(cors({
-    origin: true,
+    origin: isDev
+      ? ['http://localhost:3000', 'http://localhost:5173', 'http://127.0.0.1:3000', 'http://127.0.0.1:5173']
+      : true,
     credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    exposedHeaders: ['Content-Length', 'Content-Type'],
+    maxAge: 86400, // 24 hours
   }))
   .use(
     swagger({
@@ -54,6 +60,7 @@ const app = new Elysia()
   }))
   .use(healthRoutes)
   .use(authRoutes)
+  .use(protectedAuthRoutes)
   .use(inviteRoutes)
   .use(twitterRoutes)
   .use(growthRoutes)

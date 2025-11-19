@@ -376,11 +376,10 @@ export function Overview() {
             <button
               key={w}
               onClick={() => setWindow(w)}
-              class={`px-6 py-2.5 rounded-md text-sm font-semibold transition-all ${
-                window === w
-                  ? 'bg-blue-600 text-white shadow-lg'
-                  : 'text-gray-400 hover:text-white hover:bg-gray-900'
-              }`}
+              class={`px-6 py-2.5 rounded-md text-sm font-semibold transition-all ${window === w
+                ? 'bg-blue-600 text-white shadow-lg'
+                : 'text-gray-400 hover:text-white hover:bg-gray-900'
+                }`}
             >
               {w.charAt(0).toUpperCase() + w.slice(1)}
             </button>
@@ -421,7 +420,7 @@ export function Overview() {
             {/* Largest DAO */}
             <div class="bg-gradient-to-br from-gray-900/50 to-black/30 rounded-lg p-5 border border-gray-800/50 hover:border-yellow-500/30 transition-all shadow-sm hover:shadow-yellow-500/10 backdrop-blur-sm">
               <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">Largest DAO</p>
-              {daoStats.largestDao ? (
+              {daoStats.largestDao && daoStats.largestDao.followerCount != null ? (
                 <>
                   <p class="text-base font-bold text-white truncate mb-2">{daoStats.largestDao.name}</p>
                   <p class="text-xs text-gray-400 font-medium">
@@ -451,7 +450,7 @@ export function Overview() {
             {/* Engagement Leader */}
             <div class="bg-gradient-to-br from-gray-900/50 to-black/30 rounded-lg p-5 border border-gray-800/50 hover:border-pink-500/30 transition-all shadow-sm hover:shadow-pink-500/10 backdrop-blur-sm">
               <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">Best Engagement</p>
-              {daoStats.engagementLeader ? (
+              {daoStats.engagementLeader && daoStats.engagementLeader.engagementRate != null ? (
                 <>
                   <p class="text-base font-bold text-white truncate mb-2">{daoStats.engagementLeader.name}</p>
                   <p class="text-xs text-gray-400 font-medium">
@@ -517,31 +516,28 @@ export function Overview() {
                   <div class="flex gap-2 bg-gray-900/50 border border-gray-700 rounded-lg p-1.5">
                     <button
                       onClick={() => setChartView('absolute')}
-                      class={`px-5 py-2.5 rounded-md text-xs font-bold transition-all ${
-                        chartView === 'absolute'
-                          ? 'bg-gradient-to-r from-blue-600 to-blue-500 text-white shadow-lg shadow-blue-600/30'
-                          : 'text-gray-400 hover:text-white hover:bg-gray-800'
-                      }`}
+                      class={`px-5 py-2.5 rounded-md text-xs font-bold transition-all ${chartView === 'absolute'
+                        ? 'bg-gradient-to-r from-blue-600 to-blue-500 text-white shadow-lg shadow-blue-600/30'
+                        : 'text-gray-400 hover:text-white hover:bg-gray-800'
+                        }`}
                     >
                       Absolute Values
                     </button>
                     <button
                       onClick={() => setChartView('normalized')}
-                      class={`px-5 py-2.5 rounded-md text-xs font-bold transition-all ${
-                        chartView === 'normalized'
-                          ? 'bg-gradient-to-r from-purple-600 to-purple-500 text-white shadow-lg shadow-purple-600/30'
-                          : 'text-gray-400 hover:text-white hover:bg-gray-800'
-                      }`}
+                      class={`px-5 py-2.5 rounded-md text-xs font-bold transition-all ${chartView === 'normalized'
+                        ? 'bg-gradient-to-r from-purple-600 to-purple-500 text-white shadow-lg shadow-purple-600/30'
+                        : 'text-gray-400 hover:text-white hover:bg-gray-800'
+                        }`}
                     >
                       % Growth
                     </button>
                     <button
                       onClick={() => setChartView('growth')}
-                      class={`px-5 py-2.5 rounded-md text-xs font-bold transition-all ${
-                        chartView === 'growth'
-                          ? 'bg-gradient-to-r from-green-600 to-green-500 text-white shadow-lg shadow-green-600/30'
-                          : 'text-gray-400 hover:text-white hover:bg-gray-800'
-                      }`}
+                      class={`px-5 py-2.5 rounded-md text-xs font-bold transition-all ${chartView === 'growth'
+                        ? 'bg-gradient-to-r from-green-600 to-green-500 text-white shadow-lg shadow-green-600/30'
+                        : 'text-gray-400 hover:text-white hover:bg-gray-800'
+                        }`}
                     >
                       Growth Rate
                     </button>
@@ -566,11 +562,10 @@ export function Overview() {
                             }
                             setSelectedPlatforms(newSelected);
                           }}
-                          class={`px-4 py-2 rounded-lg text-xs font-bold transition-all border-2 ${
-                            isSelected
-                              ? 'bg-gradient-to-r from-blue-600/30 to-blue-500/20 text-blue-300 border-blue-500 shadow-lg shadow-blue-600/20'
-                              : 'bg-gray-900/50 text-gray-400 border-gray-700 hover:bg-gray-800 hover:text-white hover:border-gray-600'
-                          }`}
+                          class={`px-4 py-2 rounded-lg text-xs font-bold transition-all border-2 ${isSelected
+                            ? 'bg-gradient-to-r from-blue-600/30 to-blue-500/20 text-blue-300 border-blue-500 shadow-lg shadow-blue-600/20'
+                            : 'bg-gray-900/50 text-gray-400 border-gray-700 hover:bg-gray-800 hover:text-white hover:border-gray-600'
+                            }`}
                         >
                           <span class="flex items-center gap-2">
                             {isSelected ? '✓' : '○'} {platform.replace(' Followers', '').replace(' Members', '').replace(' Subscribers', '')}

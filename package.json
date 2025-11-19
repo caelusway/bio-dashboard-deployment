@@ -1,20 +1,39 @@
 {
   "name": "bio-dashboard-deployment",
   "version": "1.0.0",
-  "description": "Bio Dashboard + Internal API - Railway Deployment",
+  "description": "BioProtocol Dashboard - Monorepo for frontend and backend",
   "private": true,
+  "workspaces": [
+    "apps/*"
+  ],
   "scripts": {
-    "dev:dashboard": "cd apps/bio-dashboard && bun run dev",
-    "dev:api": "cd apps/bio-internal && bun run dev",
-    "build": "./deploy.sh",
-    "start": "cd apps/bio-internal && NODE_ENV=production bun run src/index.ts",
-    "test:build": "cd apps/bio-dashboard && bun install && bun run build && cd ../bio-internal && bun install && NODE_ENV=production bun run src/index.ts"
+    "dev": "docker-compose up",
+    "dev:frontend": "cd apps/bio-dashboard && bun run dev",
+    "dev:backend": "cd apps/bio-internal && bun run dev",
+    "build": "docker-compose build",
+    "build:prod": "docker-compose -f docker-compose.prod.yml build",
+    "up": "docker-compose up -d",
+    "up:prod": "docker-compose -f docker-compose.prod.yml up -d",
+    "down": "docker-compose down",
+    "down:prod": "docker-compose -f docker-compose.prod.yml down",
+    "logs": "docker-compose logs -f",
+    "logs:frontend": "docker-compose logs -f frontend",
+    "logs:backend": "docker-compose logs -f backend",
+    "ps": "docker-compose ps",
+    "restart": "docker-compose restart",
+    "clean": "docker-compose down -v && rm -rf apps/*/node_modules",
+    "sync:followers": "cd apps/bio-internal && bun run sync:followers",
+    "sync:engagement": "cd apps/bio-internal && bun run sync:engagement",
+    "sync:full": "cd apps/bio-internal && bun run sync:full"
   },
-  "keywords": ["bio", "dashboard", "api", "railway"],
-  "author": "BioDAO",
-  "license": "MIT",
   "engines": {
-    "node": ">=20.0.0",
+    "node": ">=18.0.0",
     "bun": ">=1.0.0"
-  }
+  },
+  "keywords": [
+    "bioprotocol",
+    "dashboard",
+    "monorepo",
+    "docker"
+  ]
 }

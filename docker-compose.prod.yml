@@ -1,0 +1,49 @@
+version: '3.8'
+
+services:
+  frontend:
+    build:
+      context: ./apps/bio-dashboard
+      dockerfile: Dockerfile
+      args:
+        - VITE_API_URL=${VITE_API_URL}
+    ports:
+      - "${FRONTEND_PORT:-3000}:3000"
+    environment:
+      - NODE_ENV=production
+      - VITE_API_URL=${VITE_API_URL}
+    restart: unless-stopped
+    networks:
+      - bio-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  backend:
+    build:
+      context: ./apps/bio-internal
+      dockerfile: Dockerfile
+    ports:
+      - "${BACKEND_PORT:-4100}:4100"
+    env_file:
+      - ./apps/bio-internal/.env
+    environment:
+      - NODE_ENV=production
+      - PORT=4100
+      - ENABLE_AUTO_TWITTER_SYNC=${ENABLE_AUTO_TWITTER_SYNC:-true}
+    restart: unless-stopped
+    networks:
+      - bio-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4100/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+networks:
+  bio-network:
+    driver: bridge

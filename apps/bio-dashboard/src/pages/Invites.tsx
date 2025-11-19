@@ -6,6 +6,7 @@ interface Invite {
   email: string;
   invitedBy: string;
   status: 'pending' | 'accepted' | 'expired' | 'revoked';
+  inviteToken: string;
   expiresAt: string;
   acceptedAt: string | null;
   createdAt: string;
@@ -70,15 +71,15 @@ export function Invites() {
       const data = await response.json();
 
       if (response.ok) {
-        setSuccess(`Invite created successfully!`);
         setNewEmail('');
         setShowForm(false);
         loadInvites();
 
-        // Show invite link
+        // Auto-copy invite link
         const inviteUrl = `${window.location.origin}/signup/${data.invite.inviteToken}`;
         navigator.clipboard.writeText(inviteUrl);
-        alert(`Invite link copied to clipboard:\n\n${inviteUrl}`);
+        setSuccess(`Invite created for ${data.invite.email}! Link copied to clipboard.`);
+        setTimeout(() => setSuccess(''), 5000);
       } else {
         setError(data.error || 'Failed to create invite');
       }
@@ -129,6 +130,13 @@ export function Invites() {
     } catch (err) {
       setError('Failed to resend invite');
     }
+  };
+
+  const handleCopyLink = (inviteToken: string) => {
+    const inviteUrl = `${window.location.origin}/signup/${inviteToken}`;
+    navigator.clipboard.writeText(inviteUrl);
+    setSuccess('Invite link copied to clipboard!');
+    setTimeout(() => setSuccess(''), 3000);
   };
 
   if (user?.role !== 'admin') {
@@ -193,7 +201,7 @@ export function Invites() {
               <tr>
                 <th class="px-6 py-4 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Email</th>
                 <th class="px-6 py-4 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Status</th>
-                <th class="px-6 py-4 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Invited By</th>
+                <th class="px-6 py-4 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Invite Link</th>
                 <th class="px-6 py-4 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Expires</th>
                 <th class="px-6 py-4 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Actions</th>
               </tr>
@@ -212,7 +220,21 @@ export function Invites() {
                       {invite.status}
                     </span>
                   </td>
-                  <td class="px-6 py-4 text-gray-400">{invite.invitedBy}</td>
+                  <td class="px-6 py-4">
+                    {invite.status === 'pending' ? (
+                      <button
+                        onClick={() => handleCopyLink(invite.inviteToken)}
+                        class="flex items-center gap-2 text-purple-400 hover:text-purple-300 text-sm font-medium bg-purple-500/10 hover:bg-purple-500/20 px-3 py-1.5 rounded-lg transition-colors"
+                      >
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                        </svg>
+                        Copy Link
+                      </button>
+                    ) : (
+                      <span class="text-gray-500 text-sm">-</span>
+                    )}
+                  </td>
                   <td class="px-6 py-4 text-gray-400">
                     {new Date(invite.expiresAt).toLocaleDateString()}
                   </td>

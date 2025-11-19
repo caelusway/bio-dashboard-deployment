@@ -3,6 +3,15 @@ import { env } from '../config/env';
 import { db } from '../db/client';
 import { daoEntities, twitterPosts, daoFollowerSnapshots } from '../db/schema';
 
+/**
+ * Twitter Sync Job
+ *
+ * This job syncs tweets and follower counts for all DAOs.
+ * For more specialized tracking, see:
+ * - followerSync.ts: Dedicated follower tracking with growth analytics
+ * - engagementSync.ts: Dedicated engagement metric updates for tweets
+ */
+
 type DaoEntity = typeof daoEntities.$inferSelect;
 
 interface TwitterUserResponse {
