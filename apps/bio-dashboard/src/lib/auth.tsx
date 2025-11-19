@@ -50,14 +50,14 @@ export function AuthProvider({ children }: { children: preact.ComponentChildren 
     }
 
     // Check active session
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(({ data: { session } }: { data: any }) => {
       setSession(session);
       if (session) {
         loadUserDetails(session.user);
       } else {
         setLoading(false);
       }
-    }).catch((err) => {
+    }).catch((err: any) => {
       console.error('Failed to get session:', err);
       setLoading(false);
     });
@@ -65,18 +65,12 @@ export function AuthProvider({ children }: { children: preact.ComponentChildren 
     // Listen for auth changes
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((event, session) => {
+    } = supabase.auth.onAuthStateChange((event: any, session: any) => {
       console.log('Auth state change:', event);
       
       setSession(session);
       
-      // Handle password recovery/invite flow
-      if (event === 'PASSWORD_RECOVERY' || event === 'USER_UPDATED') {
-        if (session) {
-          // Redirect to update password page
-          window.location.href = '/update-password';
-        }
-      } else if (session) {
+      if (session) {
         loadUserDetails(session.user);
       } else {
         setUser(null);

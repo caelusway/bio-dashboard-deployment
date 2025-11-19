@@ -8,7 +8,6 @@ import { Analytics } from './pages/Analytics';
 import { DAOs } from './pages/DAOs';
 import { DAODetail } from './pages/DAODetail';
 import { Login } from './pages/Login';
-import { UpdatePassword } from './pages/UpdatePassword';
 
 function ProtectedRoutes() {
   const { user, loading } = useAuth();
@@ -33,12 +32,11 @@ function ProtectedRoutes() {
     );
   }
 
-  // Public routes (login, update-password)
+  // Public routes (login only)
   if (!user) {
     return (
       <Router>
         <Route path="/login" component={Login} />
-        <Route path="/update-password" component={UpdatePassword} />
         <Route default component={Login} />
       </Router>
     );
