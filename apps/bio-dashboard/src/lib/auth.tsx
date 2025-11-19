@@ -31,7 +31,6 @@ interface AuthContextType {
   session: Session | null;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<void>;
-  signUp: (email: string, password: string, fullName: string, inviteToken: string) => Promise<void>;
   signOut: () => Promise<void>;
 }
 
@@ -66,9 +65,18 @@ export function AuthProvider({ children }: { children: preact.ComponentChildren 
     // Listen for auth changes
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log('Auth state change:', event);
+      
       setSession(session);
-      if (session) {
+      
+      // Handle password recovery/invite flow
+      if (event === 'PASSWORD_RECOVERY' || event === 'USER_UPDATED') {
+        if (session) {
+          // Redirect to update password page
+          window.location.href = '/update-password';
+        }
+      } else if (session) {
         loadUserDetails(session.user);
       } else {
         setUser(null);
@@ -117,23 +125,6 @@ export function AuthProvider({ children }: { children: preact.ComponentChildren 
     console.log('User details loaded:', data.user.email);
   };
 
-  const signUp = async (email: string, password: string, fullName: string, inviteToken: string) => {
-    // Use our backend API for signup (to validate invite)
-    const response = await fetch(`${import.meta.env.VITE_API_URL}/auth/signup`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password, fullName, inviteToken }),
-    });
-
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error || 'Signup failed');
-    }
-
-    // Now sign in
-    await signIn(email, password);
-  };
-
   const signOut = async () => {
     await supabase.auth.signOut();
     setUser(null);
@@ -141,7 +132,7 @@ export function AuthProvider({ children }: { children: preact.ComponentChildren 
   };
 
   return (
-    <AuthContext.Provider value={{ user, session, loading, signIn, signUp, signOut }}>
+    <AuthContext.Provider value={{ user, session, loading, signIn, signOut }}>
       {children}
     </AuthContext.Provider>
   );

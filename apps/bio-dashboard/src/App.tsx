@@ -8,8 +8,7 @@ import { Analytics } from './pages/Analytics';
 import { DAOs } from './pages/DAOs';
 import { DAODetail } from './pages/DAODetail';
 import { Login } from './pages/Login';
-import { Signup } from './pages/Signup';
-import { Invites } from './pages/Invites';
+import { UpdatePassword } from './pages/UpdatePassword';
 
 function ProtectedRoutes() {
   const { user, loading } = useAuth();
@@ -22,28 +21,24 @@ function ProtectedRoutes() {
     return <DAODetail key={slug} slug={slug} />;
   };
 
-  const SignupWithToken = ({ token }: { token: string }) => {
-    return <Signup token={token} />;
-  };
-
   // Show loading state
   if (loading) {
     return (
       <div class="flex h-screen bg-black items-center justify-center">
         <div class="text-center">
-          <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500 mx-auto mb-4"></div>
+          <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
           <p class="text-gray-400">Loading...</p>
         </div>
       </div>
     );
   }
 
-  // Public routes (login, signup)
+  // Public routes (login, update-password)
   if (!user) {
     return (
       <Router>
         <Route path="/login" component={Login} />
-        <Route path="/signup/:token" component={SignupWithToken} />
+        <Route path="/update-password" component={UpdatePassword} />
         <Route default component={Login} />
       </Router>
     );
@@ -63,7 +58,6 @@ function ProtectedRoutes() {
               <Route path="/daos" component={DAOs} />
               <Route path="/daos/:slug" component={DAODetailWithKey} />
               <Route path="/analytics" component={Analytics} />
-              <Route path="/invites" component={Invites} />
             </Router>
           </div>
         </main>

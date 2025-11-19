@@ -54,7 +54,7 @@ export function Login() {
                 value={email}
                 onInput={(e) => setEmail((e.target as HTMLInputElement).value)}
                 required
-                class="w-full px-4 py-3 bg-gray-900/50 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-white placeholder-gray-500"
+                class="w-full px-4 py-3 bg-gray-900/50 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white placeholder-gray-500"
                 placeholder="your@email.com"
               />
             </div>
@@ -66,7 +66,7 @@ export function Login() {
                 value={password}
                 onInput={(e) => setPassword((e.target as HTMLInputElement).value)}
                 required
-                class="w-full px-4 py-3 bg-gray-900/50 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-white placeholder-gray-500"
+                class="w-full px-4 py-3 bg-gray-900/50 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white placeholder-gray-500"
                 placeholder="••••••••"
               />
             </div>
@@ -81,7 +81,8 @@ export function Login() {
           </form>
 
           <div class="mt-6 text-center text-sm text-gray-400">
-            <p>Invite-only access.</p>
+            <p>Access managed via Supabase Authentication.</p>
+            <p class="mt-2 text-xs">Contact your administrator for access.</p>
           </div>
         </div>
       </div>
