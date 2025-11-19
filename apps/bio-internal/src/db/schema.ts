@@ -90,6 +90,7 @@ export const orgRelations = relations(orgs, ({ many }) => ({
 export const daoRelations = relations(daoEntities, ({ many }) => ({
   posts: many(twitterPosts),
   followerSnapshots: many(daoFollowerSnapshots),
+  discordChannels: many(discordChannels),
 }));
 
 export const postRelations = relations(twitterPosts, ({ many }) => ({
@@ -290,3 +291,71 @@ export const users = pgTable('users', {
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow(),
 });
+
+// ================================
+// DISCORD INTEGRATION
+// ================================
+
+export const discordChannels = pgTable('discord_channels', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  daoId: uuid('dao_id').references(() => daoEntities.id, { onDelete: 'cascade' }),
+  channelId: text('channel_id').notNull().unique(),
+  name: text('name').notNull(),
+  type: text('type').default('text'),
+  category: text('category'), // Discord category name
+  categoryId: text('category_id'), // Discord category ID
+  lastSyncedAt: timestamp('last_synced_at', { withTimezone: true }),
+  metadata: jsonb('metadata').default({}),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow(),
+});
+
+export const discordMessages = pgTable('discord_messages', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  discordId: text('discord_id').notNull().unique(),
+  channelId: uuid('channel_id').notNull().references(() => discordChannels.id, { onDelete: 'cascade' }),
+  content: text('content'),
+  authorId: text('author_id').notNull(),
+  authorUsername: text('author_username').notNull(),
+  attachments: jsonb('attachments').default([]),
+  embeds: jsonb('embeds').default([]),
+  postedAt: timestamp('posted_at', { withTimezone: true }).notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
+});
+
+export const discordReports = pgTable('discord_reports', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  channelId: uuid('channel_id').references(() => discordChannels.id, { onDelete: 'set null' }),
+  reportType: text('report_type').notNull(), // 'weekly', 'monthly'
+  periodStart: timestamp('period_start', { withTimezone: true }).notNull(),
+  periodEnd: timestamp('period_end', { withTimezone: true }).notNull(),
+  content: text('content').notNull(),
+  summary: text('summary'),
+  status: text('status').default('draft'),
+  metadata: jsonb('metadata').default({}),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow(),
+});
+
+export const discordChannelRelations = relations(discordChannels, ({ one, many }) => ({
+  dao: one(daoEntities, {
+    fields: [discordChannels.daoId],
+    references: [daoEntities.id],
+  }),
+  messages: many(discordMessages),
+  reports: many(discordReports),
+}));
+
+export const discordMessageRelations = relations(discordMessages, ({ one }) => ({
+  channel: one(discordChannels, {
+    fields: [discordMessages.channelId],
+    references: [discordChannels.id],
+  }),
+}));
+
+export const discordReportRelations = relations(discordReports, ({ one }) => ({
+  channel: one(discordChannels, {
+    fields: [discordReports.channelId],
+    references: [discordChannels.id],
+  }),
+}));

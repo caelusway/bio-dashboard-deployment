@@ -20,13 +20,22 @@
     "drizzle:migrate": "bun run scripts/run-migrations.ts",
     "sync:followers": "bun run src/jobs/followerSync.ts",
     "sync:engagement": "bun run src/jobs/engagementSync.ts",
-    "sync:full": "bun run src/jobs/followerSync.ts && bun run src/jobs/engagementSync.ts"
+    "sync:full": "bun run src/jobs/followerSync.ts && bun run src/jobs/engagementSync.ts",
+    "discord:discover": "bun run scripts/discord-channel-discovery.ts",
+    "discord:generate-mappings": "bun run scripts/generate-channel-mappings.ts",
+    "discord:backfill": "bun run scripts/discord-backfill-messages.ts",
+    "discord:generate-reports": "bun run scripts/discord-generate-reports.ts",
+    "discord:sync": "bun run scripts/discord-sync-and-report.ts",
+    "discord:weekly-report": "bun run scripts/discord-weekly-reports-cron.ts",
+    "discord:monthly-report": "bun run scripts/discord-monthly-reports-cron.ts"
   },
   "dependencies": {
     "@elysiajs/cors": "^1.4.0",
     "@elysiajs/static": "^1.4.6",
     "@elysiajs/swagger": "^1.0.0",
     "@supabase/supabase-js": "^2.39.7",
+    "discord.js": "^14.25.0",
+    "dotenv": "^17.2.3",
     "drizzle-orm": "^0.44.6",
     "elysia": "^1.0.0-beta.3",
     "postgres": "^3.4.4",

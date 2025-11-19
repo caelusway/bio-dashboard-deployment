@@ -6,6 +6,9 @@ const EnvSchema = z.object({
   SUPABASE_SERVICE_ROLE_KEY: z.string(),
   SUPABASE_JWT_SECRET: z.string(),
   TWITTER_BEARER_TOKEN: z.string(),
+  DISCORD_BOT_TOKEN: z.string().optional(),
+  DISCORD_GUILD_ID: z.string().optional(),
+  OPENAI_API_KEY: z.string().optional(),
   PORT: z.coerce.number().default(4100),
   LOG_LEVEL: z.enum(['error', 'warn', 'info', 'debug']).default('info'),
 });

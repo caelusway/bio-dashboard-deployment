@@ -12,12 +12,5 @@ export default {
   dbCredentials: {
     url: process.env.SUPABASE_DB_URL!,
   },
-  tablesFilter: [
-    'orgs',
-    'profiles',
-    'dao_entities',
-    'twitter_posts',
-    'twitter_post_metrics',
-  ],
   breakpoints: true,
 } satisfies Config;
