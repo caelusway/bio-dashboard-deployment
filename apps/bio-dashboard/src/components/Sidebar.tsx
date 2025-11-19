@@ -65,7 +65,7 @@ export function Sidebar() {
                 <Link
                   key={item.href}
                   href={item.href}
-                  activeClassName="bg-gradient-to-r from-purple-600/20 to-purple-600/10 text-white border-l-2 border-purple-500"
+                  activeClassName="bg-gradient-to-r from-blue-600/20 to-blue-600/10 text-white border-l-2 border-blue-500"
                   class="flex items-center gap-3 px-4 py-3 text-sm text-gray-400 rounded-lg hover:bg-gray-900 hover:text-white transition-all border-l-2 border-transparent"
                 >
                   <PlatformIcon platform={item.platform} size="md" />

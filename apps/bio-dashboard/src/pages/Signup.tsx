@@ -56,7 +56,7 @@ export function Signup({ token }: { token: string }) {
     return (
       <div class="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 flex items-center justify-center">
         <div class="text-center">
-          <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500 mx-auto mb-4"></div>
+          <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
           <p class="text-gray-400">Verifying invite...</p>
         </div>
       </div>
@@ -73,7 +73,7 @@ export function Signup({ token }: { token: string }) {
             <p class="text-gray-400 mb-6">{error}</p>
             <a
               href="/login"
-              class="text-purple-400 hover:text-purple-300 font-medium"
+              class="text-blue-400 hover:text-blue-300 font-medium"
             >
               Back to Login
             </a>
@@ -117,7 +117,7 @@ export function Signup({ token }: { token: string }) {
                 value={fullName}
                 onInput={(e) => setFullName((e.target as HTMLInputElement).value)}
                 required
-                class="w-full px-4 py-3 bg-gray-900/50 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-white placeholder-gray-500"
+                class="w-full px-4 py-3 bg-gray-900/50 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white placeholder-gray-500"
                 placeholder="John Doe"
               />
             </div>
@@ -130,7 +130,7 @@ export function Signup({ token }: { token: string }) {
                 onInput={(e) => setPassword((e.target as HTMLInputElement).value)}
                 required
                 minLength={8}
-                class="w-full px-4 py-3 bg-gray-900/50 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-white placeholder-gray-500"
+                class="w-full px-4 py-3 bg-gray-900/50 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white placeholder-gray-500"
                 placeholder="••••••••"
               />
               <p class="text-xs text-gray-500 mt-1">Minimum 8 characters</p>
@@ -139,7 +139,7 @@ export function Signup({ token }: { token: string }) {
             <button
               type="submit"
               disabled={loading}
-              class="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+              class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? 'Creating account...' : 'Create Account'}
             </button>
@@ -147,7 +147,7 @@ export function Signup({ token }: { token: string }) {
 
           <div class="mt-6 text-center text-sm text-gray-400">
             Already have an account?{' '}
-            <a href="/login" class="text-purple-400 hover:text-purple-300 font-medium">
+            <a href="/login" class="text-blue-400 hover:text-blue-300 font-medium">
               Sign in
             </a>
           </div>

@@ -156,7 +156,7 @@ export function Invites() {
         </div>
         <button
           onClick={() => setShowForm(!showForm)}
-          class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-lg font-medium transition-colors"
+          class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition-colors"
         >
           {showForm ? 'Cancel' : '+ New Invite'}
         </button>
@@ -178,11 +178,11 @@ export function Invites() {
               onInput={(e) => setNewEmail((e.target as HTMLInputElement).value)}
               placeholder="user@example.com"
               required
-              class="flex-1 px-4 py-2 bg-gray-900/50 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 text-white"
+              class="flex-1 px-4 py-2 bg-gray-900/50 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-white"
             />
             <button
               type="submit"
-              class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-lg font-medium transition-colors"
+              class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition-colors"
             >
               Create Invite
             </button>
@@ -192,7 +192,11 @@ export function Invites() {
 
       {loading ? (
         <div class="text-center py-12">
-          <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500 mx-auto"></div>
+          <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
+        </div>
+      ) : invites.length === 0 ? (
+        <div class="text-center py-12 bg-gray-800/30 rounded-xl border border-gray-700">
+          <p class="text-gray-400">No invites found</p>
         </div>
       ) : (
         <div class="bg-gray-800/30 rounded-xl overflow-hidden border border-gray-700">
@@ -224,7 +228,7 @@ export function Invites() {
                     {invite.status === 'pending' ? (
                       <button
                         onClick={() => handleCopyLink(invite.inviteToken)}
-                        class="flex items-center gap-2 text-purple-400 hover:text-purple-300 text-sm font-medium bg-purple-500/10 hover:bg-purple-500/20 px-3 py-1.5 rounded-lg transition-colors"
+                        class="flex items-center gap-2 text-blue-400 hover:text-blue-300 text-sm font-medium bg-blue-500/10 hover:bg-blue-500/20 px-3 py-1.5 rounded-lg transition-colors"
                       >
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
