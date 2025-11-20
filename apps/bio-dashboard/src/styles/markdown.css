@@ -1,0 +1,215 @@
+/* Discord Report Markdown Styles */
+
+.discord-report-content {
+  color: #d1d5db;
+  line-height: 1.75;
+}
+
+/* Headings */
+.discord-report-content h1 {
+  color: #ffffff;
+  font-size: 2rem;
+  font-weight: 700;
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #374151;
+}
+
+.discord-report-content h2 {
+  color: #ffffff;
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-top: 2rem;
+  margin-bottom: 0.75rem;
+}
+
+.discord-report-content h3 {
+  color: #f3f4f6;
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-top: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.discord-report-content h4 {
+  color: #e5e7eb;
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+/* Paragraphs */
+.discord-report-content p {
+  margin-bottom: 1rem;
+  color: #d1d5db;
+}
+
+/* Lists */
+.discord-report-content ul,
+.discord-report-content ol {
+  margin-bottom: 1rem;
+  padding-left: 1.5rem;
+  color: #d1d5db;
+}
+
+.discord-report-content li {
+  margin-bottom: 0.5rem;
+}
+
+.discord-report-content ul > li {
+  list-style-type: disc;
+}
+
+.discord-report-content ol > li {
+  list-style-type: decimal;
+}
+
+/* Nested lists */
+.discord-report-content ul ul,
+.discord-report-content ol ul {
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.discord-report-content ul ul > li {
+  list-style-type: circle;
+}
+
+/* Strong/Bold */
+.discord-report-content strong {
+  color: #ffffff;
+  font-weight: 600;
+}
+
+/* Emphasis/Italic */
+.discord-report-content em {
+  font-style: italic;
+  color: #9ca3af;
+}
+
+/* Code */
+.discord-report-content code {
+  background-color: #111827;
+  color: #60a5fa;
+  padding: 0.125rem 0.375rem;
+  border-radius: 0.25rem;
+  font-size: 0.875rem;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+}
+
+.discord-report-content pre {
+  background-color: #111827;
+  border: 1px solid #374151;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  overflow-x: auto;
+  margin-bottom: 1rem;
+}
+
+.discord-report-content pre code {
+  background-color: transparent;
+  padding: 0;
+  color: #d1d5db;
+}
+
+/* Blockquotes */
+.discord-report-content blockquote {
+  border-left: 4px solid #3b82f6;
+  padding-left: 1rem;
+  margin-left: 0;
+  margin-bottom: 1rem;
+  font-style: italic;
+  color: #9ca3af;
+}
+
+/* Horizontal Rules */
+.discord-report-content hr {
+  border: none;
+  border-top: 1px solid #374151;
+  margin: 2rem 0;
+}
+
+/* Tables */
+.discord-report-content table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 1rem;
+  color: #d1d5db;
+}
+
+.discord-report-content th {
+  background-color: #111827;
+  color: #ffffff;
+  font-weight: 600;
+  padding: 0.75rem;
+  text-align: left;
+  border: 1px solid #374151;
+}
+
+.discord-report-content td {
+  padding: 0.75rem;
+  border: 1px solid #374151;
+}
+
+.discord-report-content tr:nth-child(even) {
+  background-color: #111827;
+}
+
+/* Links */
+.discord-report-content a {
+  color: #60a5fa;
+  text-decoration: underline;
+  transition: color 0.2s;
+}
+
+.discord-report-content a:hover {
+  color: #93c5fd;
+}
+
+/* Emoji support */
+.discord-report-content img.emoji {
+  display: inline;
+  height: 1.25em;
+  width: 1.25em;
+  margin: 0 0.05em 0 0.1em;
+  vertical-align: -0.1em;
+}
+
+/* Special badges/tags (like action items) */
+.discord-report-content p:has(> strong:first-child) {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+/* Status indicators */
+.discord-report-content li:has(> strong:first-child) {
+  margin-bottom: 0.75rem;
+}
+
+/* Improve spacing for nested content */
+.discord-report-content h2 + ul,
+.discord-report-content h3 + ul,
+.discord-report-content h2 + ol,
+.discord-report-content h3 + ol {
+  margin-top: 0.5rem;
+}
+
+/* Summary box styling */
+.discord-report-content > p:first-of-type {
+  background-color: #111827;
+  border-left: 4px solid #3b82f6;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+/* Metric highlights */
+.discord-report-content strong:has(+ em),
+.discord-report-content strong:contains('Total'),
+.discord-report-content strong:contains('Average') {
+  color: #60a5fa;
+}
+

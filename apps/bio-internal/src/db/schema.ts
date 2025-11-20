@@ -1,4 +1,4 @@
-import { pgEnum, pgTable, uuid, text, timestamp, jsonb, integer, numeric, uniqueIndex } from 'drizzle-orm/pg-core';
+import { pgEnum, pgTable, uuid, text, timestamp, jsonb, integer, numeric, uniqueIndex, boolean } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 
 export const twitterMetricEnum = pgEnum('twitter_metric_type', [
@@ -359,3 +359,21 @@ export const discordReportRelations = relations(discordReports, ({ one }) => ({
     references: [discordChannels.id],
   }),
 }));
+
+// ============================================================================
+// API KEYS - For external application authentication
+// ============================================================================
+
+export const apiKeys = pgTable('api_keys', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  name: text('name').notNull(),
+  keyHash: text('key_hash').notNull().unique(),
+  keyPrefix: text('key_prefix').notNull(),
+  createdBy: uuid('created_by'),
+  lastUsedAt: timestamp('last_used_at', { withTimezone: true }),
+  expiresAt: timestamp('expires_at', { withTimezone: true }),
+  isActive: boolean('is_active').default(true),
+  metadata: jsonb('metadata').default({}),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow(),
+});

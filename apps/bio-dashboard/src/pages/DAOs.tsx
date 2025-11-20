@@ -43,14 +43,14 @@ export function DAOs() {
 
   useEffect(() => {
     loadData();
-  }, [currentPage]);
+  }, [currentPage, sortBy]);
 
   const loadData = async () => {
     try {
       setLoading(true);
 
       const [daosResponse, ecosystemResponse] = await Promise.all([
-        fetch(`${API_BASE_URL}/daos?page=${currentPage}&limit=12`),
+        fetch(`${API_BASE_URL}/daos?page=${currentPage}&limit=12&sortBy=${sortBy}`),
         fetch(`${API_BASE_URL}/daos/stats/ecosystem`),
       ]);
 
@@ -73,18 +73,8 @@ export function DAOs() {
     }
   };
 
-  const sortedDaos = [...daos].sort((a, b) => {
-    switch (sortBy) {
-      case 'followers':
-        return b.followerCount - a.followerCount;
-      case 'growth':
-        return b.followerGrowthPct - a.followerGrowthPct;
-      case 'posts':
-        return b.totalPosts - a.totalPosts;
-      default:
-        return 0;
-    }
-  });
+  // Backend now handles sorting, so we don't need to sort on frontend
+  const sortedDaos = daos;
 
   if (loading) {
     return <LoadingSpinner />;
@@ -192,7 +182,10 @@ export function DAOs() {
           ].map((option) => (
             <button
               key={option.value}
-              onClick={() => setSortBy(option.value as any)}
+              onClick={() => {
+                setSortBy(option.value as any);
+                setCurrentPage(1); // Reset to page 1 when changing sort
+              }}
               class={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
                 sortBy === option.value
                   ? 'bg-blue-600 text-white shadow-lg'

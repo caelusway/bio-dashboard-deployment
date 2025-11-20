@@ -1,6 +1,5 @@
 import { Elysia, t } from 'elysia';
-// import { authMiddleware } from '../middleware/auth';
-// import { roleGuard } from '../middleware/roles';
+import { authGuard } from '../middleware/authGuard';
 import {
   getGrowthSourceSummaries,
   getGrowthHistory,
@@ -10,11 +9,9 @@ import {
   GrowthMetricType,
 } from '../services/growthAnalytics';
 
-// TODO: Re-enable auth in Phase 2
-// For MVP read-only dashboard, auth is disabled
-// NOTE: Using /api instead of /v1 to bypass global auth middleware
 export const growthRoutes = new Elysia({ prefix: '/api/growth' })
-  .get('/sources', async ({ query, set }) => {
+  .guard(authGuard, (app) => app
+    .get('/sources', async ({ query, set }) => {
     const windowParam = typeof query.window === 'string' ? query.window.toLowerCase() : undefined;
     const window: GrowthSnapshotWindow = isValidWindow(windowParam ?? '') ? (windowParam as GrowthSnapshotWindow) : 'day';
 
@@ -53,4 +50,5 @@ export const growthRoutes = new Elysia({ prefix: '/api/growth' })
     );
 
     return { data: history };
-  });
+  })
+); // Close the guard

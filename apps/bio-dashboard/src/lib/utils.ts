@@ -2,6 +2,9 @@
  * Utility functions for formatting and data manipulation
  */
 
+// API URL configuration
+export const API_URL = import.meta.env.VITE_API_URL || '';
+
 export function formatNumber(num: number | null | undefined): string {
   if (num == null) return '0';
   if (num >= 1000000) {

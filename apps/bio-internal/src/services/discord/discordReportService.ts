@@ -400,17 +400,9 @@ IMPORTANT:
   private formatReport(reportData: ReportData, aiAnalysis: AIAnalysis, reportType: string): string {
     const reportTitle = `${reportType.charAt(0).toUpperCase() + reportType.slice(1)} Report`;
     const sentimentEmoji = aiAnalysis.sentiment === 'positive' ? '🟢' : aiAnalysis.sentiment === 'negative' ? '🔴' : '🟡';
-    const engagementEmoji = aiAnalysis.engagementLevel === 'high' ? '🔥' : aiAnalysis.engagementLevel === 'low' ? '❄️' : '📊';
+    const engagementEmoji = aiAnalysis.engagementLevel === 'high' ? '🔥' : aiAnalysis.engagementLevel === 'low' ? '❄️' : '⚡';
     
-    return `# ${reportTitle}: ${reportData.channelName}
-**DAO/Project:** ${reportData.daoName}  
-**Report Generated:** ${new Date().toISOString().split('T')[0]}  
-**Sentiment:** ${sentimentEmoji} ${aiAnalysis.sentiment.toUpperCase()}  
-**Engagement:** ${engagementEmoji} ${aiAnalysis.engagementLevel.toUpperCase()}
-
----
-
-## 📋 Executive Summary
+    return `## 📋 Executive Summary
 
 ${aiAnalysis.summary}
 

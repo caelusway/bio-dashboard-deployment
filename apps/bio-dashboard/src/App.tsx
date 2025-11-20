@@ -7,6 +7,9 @@ import { Platform } from './pages/Platform';
 import { Analytics } from './pages/Analytics';
 import { DAOs } from './pages/DAOs';
 import { DAODetail } from './pages/DAODetail';
+import { DiscordOverview } from './pages/DiscordOverview';
+import { DiscordReports } from './pages/DiscordReports';
+import { ApiKeys } from './pages/ApiKeys';
 import { Login } from './pages/Login';
 
 function ProtectedRoutes() {
@@ -56,6 +59,9 @@ function ProtectedRoutes() {
               <Route path="/daos" component={DAOs} />
               <Route path="/daos/:slug" component={DAODetailWithKey} />
               <Route path="/analytics" component={Analytics} />
+              <Route path="/discord" component={DiscordOverview} />
+              <Route path="/discord-reports" component={DiscordReports} />
+              <Route path="/api-keys" component={ApiKeys} />
             </Router>
           </div>
         </main>

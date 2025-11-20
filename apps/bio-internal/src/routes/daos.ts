@@ -3,23 +3,30 @@ import { db } from '../db/client';
 import { daoEntities, daoFollowerSnapshots, twitterPosts } from '../db/schema';
 import { eq, sql, desc, and, gte, inArray } from 'drizzle-orm';
 import { syncAllDaoProfileImages, syncDaoProfileImage } from '../services/twitterProfileImage';
+import { authGuard } from '../middleware/authGuard';
 
 export const daoRoutes = new Elysia({ prefix: '/daos' })
-  // Get all DAOs with summary stats (with pagination)
-  .get(
+  .guard(authGuard, (app) => app
+    // Get all DAOs with summary stats (with pagination)
+    .get(
     '/',
     async ({ query }) => {
       const page = parseInt(query.page || '1');
       const limit = parseInt(query.limit || '12');
+      const sortBy = query.sortBy || 'followers';
       const offset = (page - 1) * limit;
 
-      // Get total count for pagination metadata
+      // Get total count for pagination metadata (exclude DAOs with 0 or null followers)
       const totalCount = await db
         .select({ count: sql<number>`count(*)::int` })
-        .from(daoEntities);
+        .from(daoEntities)
+        .where(sql`${daoEntities.followerCount} > 0`);
 
-      // Fetch paginated DAOs with post counts in a single query using LEFT JOIN
-      const daosWithPosts = await db
+      // For growth sorting, we need to fetch ALL DAOs, calculate growth, sort, then paginate
+      // For other sorting, we can paginate at the database level
+      const shouldFetchAll = sortBy === 'growth';
+
+      const baseQuery = db
         .select({
           id: daoEntities.id,
           slug: daoEntities.slug,
@@ -32,10 +39,23 @@ export const daoRoutes = new Elysia({ prefix: '/daos' })
         })
         .from(daoEntities)
         .leftJoin(twitterPosts, eq(twitterPosts.daoId, daoEntities.id))
-        .groupBy(daoEntities.id)
-        .orderBy(desc(daoEntities.followerCount))
-        .limit(limit)
-        .offset(offset);
+        .where(sql`${daoEntities.followerCount} > 0`)  // ✅ Filter out 0 or null followers
+        .groupBy(daoEntities.id);
+
+      // Apply sorting and pagination based on sortBy parameter
+      let daosWithPosts;
+      if (sortBy === 'posts') {
+        daosWithPosts = await baseQuery
+          .orderBy(desc(sql`count(distinct ${twitterPosts.id})`))
+          .limit(shouldFetchAll ? undefined : limit)
+          .offset(shouldFetchAll ? undefined : offset);
+      } else {
+        // Default to followers sorting (or fetch all for growth sorting)
+        daosWithPosts = await baseQuery
+          .orderBy(desc(daoEntities.followerCount))
+          .limit(shouldFetchAll ? undefined : limit)
+          .offset(shouldFetchAll ? undefined : offset);
+      }
 
       // Fetch follower growth data only for paginated DAOs
       const thirtyDaysAgo = new Date();
@@ -97,12 +117,19 @@ export const daoRoutes = new Elysia({ prefix: '/daos' })
         };
       });
 
+      // If sorting by growth, we need to sort after calculating growth stats, then paginate
+      let finalDaos = daosWithStats;
+      if (sortBy === 'growth') {
+        const sorted = [...daosWithStats].sort((a, b) => b.followerGrowthPct - a.followerGrowthPct);
+        finalDaos = sorted.slice(offset, offset + limit);
+      }
+
       const total = totalCount[0]?.count || 0;
       const totalPages = Math.ceil(total / limit);
 
       return {
         success: true,
-        data: daosWithStats,
+        data: finalDaos,
         pagination: {
           page,
           limit,
@@ -116,6 +143,7 @@ export const daoRoutes = new Elysia({ prefix: '/daos' })
       query: t.Object({
         page: t.Optional(t.String()),
         limit: t.Optional(t.String()),
+        sortBy: t.Optional(t.String()),
       }),
     }
   )
@@ -323,7 +351,7 @@ export const daoRoutes = new Elysia({ prefix: '/daos' })
     // Total posts
     const totalPosts = await db.select({ count: sql<number>`count(*)::int` }).from(twitterPosts);
 
-    // Top 5 DAOs by followers
+    // Top 5 DAOs by followers (exclude DAOs with 0 or null followers)
     const topDaos = await db
       .select({
         name: daoEntities.name,
@@ -331,6 +359,7 @@ export const daoRoutes = new Elysia({ prefix: '/daos' })
         followerCount: daoEntities.followerCount,
       })
       .from(daoEntities)
+      .where(sql`${daoEntities.followerCount} > 0`)
       .orderBy(desc(daoEntities.followerCount))
       .limit(5);
 
@@ -545,7 +574,7 @@ export const daoRoutes = new Elysia({ prefix: '/daos' })
       .select({ count: sql<number>`count(*)::int` })
       .from(twitterPosts);
 
-    // Largest DAO by follower count
+    // Largest DAO by follower count (exclude DAOs with 0 or null followers)
     const largestDao = await db
       .select({
         name: daoEntities.name,
@@ -553,6 +582,7 @@ export const daoRoutes = new Elysia({ prefix: '/daos' })
         followerCount: daoEntities.followerCount,
       })
       .from(daoEntities)
+      .where(sql`${daoEntities.followerCount} > 0`)
       .orderBy(desc(daoEntities.followerCount))
       .limit(1);
 
@@ -581,7 +611,7 @@ export const daoRoutes = new Elysia({ prefix: '/daos' })
     const startDate = new Date();
     startDate.setDate(startDate.getDate() - days);
 
-    // Get top DAOs by current follower count
+    // Get top DAOs by current follower count (exclude DAOs with 0 or null followers)
     const topDaos = await db
       .select({
         id: daoEntities.id,
@@ -590,6 +620,7 @@ export const daoRoutes = new Elysia({ prefix: '/daos' })
         followerCount: daoEntities.followerCount,
       })
       .from(daoEntities)
+      .where(sql`${daoEntities.followerCount} > 0`)
       .orderBy(desc(daoEntities.followerCount))
       .limit(limit);
 
@@ -737,4 +768,5 @@ export const daoRoutes = new Elysia({ prefix: '/daos' })
         slug: t.String(),
       }),
     }
-  );
+  )
+); // Close the guard

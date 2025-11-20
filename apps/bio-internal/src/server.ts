@@ -10,6 +10,9 @@ import { growthRoutes } from './routes/growth';
 import { daoRoutes } from './routes/daos';
 import { authRoutes, protectedAuthRoutes } from './routes/auth';
 import { inviteRoutes } from './routes/invites';
+import { discordRoutes } from './routes/discord';
+import { apiKeyRoutes } from './routes/apiKeys';
+import { rateLimit, securityHeaders, requestLogger } from './middleware/security';
 
 const isDev = process.env.NODE_ENV !== 'production';
 
@@ -30,25 +33,162 @@ const shouldServeDashboard = (pathname: string) => {
 };
 
 const app = new Elysia()
+  // 🔒 Security: Add security headers
+  .use(securityHeaders())
+  // 📊 Logging: Log all requests for audit
+  .use(requestLogger())
+  // 🚦 Rate limiting: Prevent abuse (1000 req/15min)
+  .use(rateLimit())
   // Enable CORS for frontend
   .use(cors({
     origin: isDev
       ? ['http://localhost:3000', 'http://localhost:5173', 'http://127.0.0.1:3000', 'http://127.0.0.1:5173']
-      : true,
+      : (origin) => {
+          // In production, only allow specific origins
+          const allowedOrigins = [
+            process.env.FRONTEND_URL,
+            process.env.DASHBOARD_URL,
+          ].filter(Boolean);
+          return allowedOrigins.length > 0 ? allowedOrigins.includes((origin as unknown as string) || '') : true;
+        },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-    exposedHeaders: ['Content-Length', 'Content-Type'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-API-Key'],
     maxAge: 86400, // 24 hours
   }))
   .use(
     swagger({
       path: '/api-docs',
+      exclude: [
+        /^\/api\/discord/,
+        /^\/daos/,
+        /^\/api\/growth/,
+        /^\/api\/keys/,
+        /^\/auth/,
+        /^\/invites/,
+        /^\/v1\/twitter\/ingest/,
+        /^\/v1\/twitter\/engagement/,
+        /^\/v1\/twitter\/followers/,
+        /^\/v1\/twitter\/posts$/,
+        /^\/v1\/twitter\/sync$/,
+        /^\/health/,
+        /^\/api$/,
+      ],
       documentation: {
         info: {
-          title: 'bio-internal Twitter API',
-          version: '0.1.0',
+          title: 'BioProtocol Public API',
+          version: '1.0.0',
+          description: `
+# BioProtocol Public API
+
+Access Twitter data for BioProtocol DAOs using their Twitter handles.
+
+## Authentication
+
+All endpoints require an API key:
+
+\`\`\`
+X-API-Key: bio_live_xxxxx
+\`\`\`
+
+**How to get an API key:**
+Contact your BioProtocol administrator or generate one from the dashboard (admin users only).
+
+## Rate Limits
+
+- **Limit:** 1000 requests per 15 minutes per API key
+- **Response:** HTTP 429 with Retry-After header when limit exceeded
+
+## Available Endpoints
+
+### 1. Get Tweets by Handle
+\`GET /v1/twitter/handle/:handle/tweets\`
+
+Fetch recent tweets for a specific Twitter handle.
+
+**Example:**
+\`\`\`bash
+curl -H "X-API-Key: bio_live_xxxxx" \\
+  "https://bio-internal-api.bioagents.dev/v1/twitter/handle/BioProtocol/tweets?limit=25"
+\`\`\`
+
+### 2. Get Engagement Metrics
+\`GET /v1/twitter/handle/:handle/engagement\`
+
+Fetch engagement history (likes, retweets, replies, views) for a Twitter handle.
+
+**Example:**
+\`\`\`bash
+curl -H "X-API-Key: bio_live_xxxxx" \\
+  "https://bio-internal-api.bioagents.dev/v1/twitter/handle/BioProtocol/engagement?days=30"
+\`\`\`
+
+### 3. Get Follower History
+\`GET /v1/twitter/handle/:handle/followers\`
+
+Fetch follower count history for a Twitter handle.
+
+**Example:**
+\`\`\`bash
+curl -H "X-API-Key: bio_live_xxxxx" \\
+  "https://bio-internal-api.bioagents.dev/v1/twitter/handle/BioProtocol/followers?days=30"
+\`\`\`
+
+## Base URLs
+
+- **Development:** http://localhost:4100
+- **Production:** https://bio-internal-api.bioagents.dev
+
+## Support
+
+For API keys, rate limit increases, or technical support:
+- **Email:** emre@bio.xyz
+- **Dashboard:** https://dashboard.bio.xyz (admin users can generate API keys)
+
+## Response Format
+
+All endpoints return JSON with the following structure:
+
+**Success:**
+\`\`\`json
+{
+  "success": true,
+  "data": { ... }
+}
+\`\`\`
+
+**Error:**
+\`\`\`json
+{
+  "success": false,
+  "error": "Error message"
+}
+\`\`\`
+          `,
+          contact: {
+            name: 'BioProtocol API Support',
+            email: 'emre@bio.xyz',
+          },
         },
+        tags: [
+          {
+            name: 'Twitter',
+            description: 'Twitter data access by handle - tweets, engagement, and follower metrics',
+          },
+        ],
+        components: {
+          securitySchemes: {
+            ApiKeyAuth: {
+              type: 'apiKey',
+              in: 'header',
+              name: 'X-API-Key',
+              description: 'API key for authentication (format: bio_live_xxxxx). Contact admin@bio.xyz to obtain an API key.',
+            },
+          },
+        },
+        security: [
+          { ApiKeyAuth: [] },
+        ],
       },
     }),
   )
@@ -62,9 +202,11 @@ const app = new Elysia()
   .use(authRoutes)
   .use(protectedAuthRoutes)
   .use(inviteRoutes)
+  .use(apiKeyRoutes) // 🔑 API key management
   .use(twitterRoutes)
   .use(growthRoutes)
-  .use(daoRoutes);
+  .use(daoRoutes)
+  .use(discordRoutes);
 
 // Only serve static frontend if explicitly enabled (for monolithic deployment)
 const serveFrontend = process.env.SERVE_FRONTEND === 'true';
@@ -88,7 +230,7 @@ if (!isDev && serveFrontend && hasDashboardBuild) {
     }
 
     if (error) {
-      return new Response(error.message, {
+      return new Response((error as Error).message, {
         status: code === 'NOT_FOUND' ? 404 : 500,
       });
     }
