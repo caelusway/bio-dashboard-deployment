@@ -120,9 +120,14 @@ export const twitterRoutes = new Elysia({ prefix: '/v1/twitter', tags: ['Twitter
         const { handle } = params;
         const { limit = '25', offset = '0' } = query;
         
-        // Find DAO by Twitter handle
+        // Find DAO by Twitter handle and get follower count
         const [dao] = await db
-          .select({ id: daoEntities.id, name: daoEntities.name })
+          .select({ 
+            id: daoEntities.id, 
+            name: daoEntities.name,
+            followerCount: daoEntities.followerCount,
+            twitterHandle: daoEntities.twitterHandle
+          })
           .from(daoEntities)
           .where(eq(daoEntities.twitterHandle, handle))
           .limit(1);
@@ -162,6 +167,7 @@ export const twitterRoutes = new Elysia({ prefix: '/v1/twitter', tags: ['Twitter
           data: {
             handle: handle,
             daoName: dao.name,
+            followerCount: dao.followerCount,
             tweets: tweets,
             pagination: {
               limit: parseInt(limit),

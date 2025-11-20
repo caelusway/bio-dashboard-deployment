@@ -76,12 +76,12 @@ const app = new Elysia()
       ],
       documentation: {
         info: {
-          title: 'BioProtocol Public API',
+          title: 'BioProtocol Dashboard API',
           version: '1.0.0',
           description: `
-# BioProtocol Public API
+# BioProtocol Dashboard API
 
-Access Twitter data for BioProtocol DAOs using their Twitter handles.
+Internal API for accessing Twitter data by handle.
 
 ## Authentication
 
@@ -92,7 +92,7 @@ X-API-Key: bio_live_xxxxx
 \`\`\`
 
 **How to get an API key:**
-Contact your BioProtocol administrator or generate one from the dashboard (admin users only).
+Generate one from the dashboard (admin users only).
 
 ## Rate Limits
 
@@ -141,9 +141,7 @@ curl -H "X-API-Key: bio_live_xxxxx" \\
 
 ## Support
 
-For API keys, rate limit increases, or technical support:
-- **Email:** emre@bio.xyz
-- **Dashboard:** https://dashboard.bio.xyz (admin users can generate API keys)
+For technical support, contact: emre@bio.xyz
 
 ## Response Format
 
@@ -166,7 +164,7 @@ All endpoints return JSON with the following structure:
 \`\`\`
           `,
           contact: {
-            name: 'BioProtocol API Support',
+            name: 'BioProtocol Dashboard Support',
             email: 'emre@bio.xyz',
           },
         },
