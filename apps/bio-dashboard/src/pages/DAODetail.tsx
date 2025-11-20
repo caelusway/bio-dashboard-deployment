@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from 'preact/hooks';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { formatNumber } from '../lib/utils';
-import { API_BASE_URL } from '../lib/api';
+import { API_BASE_URL, authenticatedFetch } from '../lib/api';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -93,9 +93,9 @@ export function DAODetail({ slug }: { slug: string }) {
       setLoading(true);
 
       const [daoResponse, followersResponse, analyticsResponse] = await Promise.all([
-        fetch(`${API_BASE_URL}/daos/${slug}`),
-        fetch(`${API_BASE_URL}/daos/${slug}/followers?days=${timeRange}`),
-        fetch(`${API_BASE_URL}/daos/${slug}/analytics?days=${timeRange}`),
+        authenticatedFetch(`${API_BASE_URL}/daos/${slug}`),
+        authenticatedFetch(`${API_BASE_URL}/daos/${slug}/followers?days=${timeRange}`),
+        authenticatedFetch(`${API_BASE_URL}/daos/${slug}/analytics?days=${timeRange}`),
       ]);
 
       const daoData = await daoResponse.json();

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'preact/hooks';
-import { api, GrowthSourceSummary, GrowthSnapshot, API_BASE_URL } from '../lib/api';
+import { api, GrowthSourceSummary, GrowthSnapshot, API_BASE_URL, authenticatedFetch } from '../lib/api';
 import { MetricCard } from '../components/MetricCard';
 import { ChartCard } from '../components/ChartCard';
 import { LoadingSpinner } from '../components/LoadingSpinner';
@@ -108,7 +108,7 @@ export function Overview() {
       // Load both growth sources and DAO stats
       const [growthResponse, daoResponse] = await Promise.all([
         api.getGrowthSources(window),
-        fetch(`${API_BASE_URL}/daos/stats/weekly`).then(r => r.json()),
+        authenticatedFetch(`${API_BASE_URL}/daos/stats/weekly`).then(r => r.json()),
       ]);
 
       console.log('[Overview] API Response:', growthResponse);

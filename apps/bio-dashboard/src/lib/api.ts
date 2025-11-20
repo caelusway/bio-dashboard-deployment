@@ -3,6 +3,8 @@
  * Connects to bio-internal Elysia API
  */
 
+import { supabase } from './auth';
+
 // API URL configuration
 // IMPORTANT: In Coolify, you MUST set VITE_API_URL to your backend service URL
 // Example: https://your-backend-domain.sslip.io or https://your-backend.ngrok-free.app
@@ -68,12 +70,23 @@ class ApiClient {
   }
 
   private async request<T>(endpoint: string, options?: RequestInit): Promise<T> {
+    // Get the current session token from Supabase
+    const { data: { session } } = await supabase.auth.getSession();
+    const token = session?.access_token;
+
+    const headers: HeadersInit = {
+      'Content-Type': 'application/json',
+      ...options?.headers,
+    };
+
+    // Add Authorization header if we have a token
+    if (token) {
+      (headers as Record<string, string>)['Authorization'] = `Bearer ${token}`;
+    }
+
     const response = await fetch(`${this.baseUrl}${endpoint}`, {
       ...options,
-      headers: {
-        'Content-Type': 'application/json',
-        ...options?.headers,
-      },
+      headers,
     });
 
     if (!response.ok) {
@@ -108,3 +121,28 @@ class ApiClient {
 }
 
 export const api = new ApiClient(API_BASE_URL);
+
+/**
+ * Helper function for authenticated fetch requests
+ * Automatically includes the JWT token from Supabase
+ */
+export async function authenticatedFetch(url: string, options?: RequestInit): Promise<Response> {
+  // Get the current session token from Supabase
+  const { data: { session } } = await supabase.auth.getSession();
+  const token = session?.access_token;
+
+  const headers: HeadersInit = {
+    'Content-Type': 'application/json',
+    ...options?.headers,
+  };
+
+  // Add Authorization header if we have a token
+  if (token) {
+    (headers as Record<string, string>)['Authorization'] = `Bearer ${token}`;
+  }
+
+  return fetch(url, {
+    ...options,
+    headers,
+  });
+}

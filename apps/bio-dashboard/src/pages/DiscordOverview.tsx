@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'preact/hooks';
 import { route } from 'preact-router';
+import { authenticatedFetch } from '../lib/api';
 
 interface DiscordStats {
   totalChannels: number;
@@ -49,8 +50,8 @@ export function DiscordOverview() {
       console.log('Channels URL:', `${apiUrl}/api/discord/channels`);
 
       const [statsRes, channelsRes] = await Promise.all([
-        fetch(`${apiUrl}/api/discord/stats`),
-        fetch(`${apiUrl}/api/discord/channels`),
+        authenticatedFetch(`${apiUrl}/api/discord/stats`),
+        authenticatedFetch(`${apiUrl}/api/discord/channels`),
       ]);
 
       console.log('📊 Stats response status:', statsRes.status);

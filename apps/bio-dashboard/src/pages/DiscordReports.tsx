@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'preact/hooks';
 import { marked } from 'marked';
 import { exportReportToPDF } from '../lib/pdfExport';
+import { authenticatedFetch } from '../lib/api';
 import '../styles/markdown.css';
 
 // Configure marked for better rendering
@@ -90,9 +91,9 @@ export function DiscordReports() {
       console.log('Reports URL:', `${apiUrl}/api/discord/reports?${params.toString()}`);
 
       const [reportsRes, channelsRes, statsRes] = await Promise.all([
-        fetch(`${apiUrl}/api/discord/reports?${params.toString()}`),
-        fetch(`${apiUrl}/api/discord/channels`),
-        fetch(`${apiUrl}/api/discord/stats`),
+        authenticatedFetch(`${apiUrl}/api/discord/reports?${params.toString()}`),
+        authenticatedFetch(`${apiUrl}/api/discord/channels`),
+        authenticatedFetch(`${apiUrl}/api/discord/stats`),
       ]);
 
       console.log('📄 Reports response status:', reportsRes.status);

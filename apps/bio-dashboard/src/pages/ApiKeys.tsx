@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'preact/hooks';
 import { useAuth } from '../lib/auth';
 import { API_URL } from '../lib/utils';
+import { authenticatedFetch } from '../lib/api';
 
 interface ApiKey {
   id: string;

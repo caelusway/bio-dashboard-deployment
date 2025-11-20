@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'preact/hooks';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { formatNumber } from '../lib/utils';
-import { API_BASE_URL } from '../lib/api';
+import { API_BASE_URL, authenticatedFetch } from '../lib/api';
 
 interface DAOSummary {
   id: string;
@@ -50,8 +50,8 @@ export function DAOs() {
       setLoading(true);
 
       const [daosResponse, ecosystemResponse] = await Promise.all([
-        fetch(`${API_BASE_URL}/daos?page=${currentPage}&limit=12&sortBy=${sortBy}`),
-        fetch(`${API_BASE_URL}/daos/stats/ecosystem`),
+        authenticatedFetch(`${API_BASE_URL}/daos?page=${currentPage}&limit=12&sortBy=${sortBy}`),
+        authenticatedFetch(`${API_BASE_URL}/daos/stats/ecosystem`),
       ]);
 
       const daosData = await daosResponse.json();
