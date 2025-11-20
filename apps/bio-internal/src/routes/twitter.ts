@@ -227,16 +227,16 @@ export const twitterRoutes = new Elysia({ prefix: '/v1/twitter', tags: ['Twitter
                 example: {
                   success: true,
                   data: {
-                    handle: 'molecule_dao',
-                    daoName: 'Molecule',
+                    handle: 'BioProtocol',
+                    daoName: 'BioProtocol',
                     tweets: [
                       {
                         id: 'uuid',
                         tweetId: '1234567890',
                         author: {
                           id: '123456',
-                          name: 'Molecule',
-                          username: 'molecule_dao',
+                          name: 'BioProtocol',
+                          username: 'BioProtocol',
                         },
                         content: 'Exciting announcement!',
                         tweetMetrics: {
